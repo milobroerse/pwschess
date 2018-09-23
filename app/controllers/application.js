@@ -10,12 +10,12 @@ export default Controller.extend({
     var b =[];
 
     var i,j;
-    for( i = 0; i < 4; i ++){
-      for( j = 0; j < 4; j ++){
+    for( i = 0; i < 4; i++){
+      for( j = 0; j < 4; j++){
         b.push('tile white');
         b.push('tile black');
       }
-      for( j = 0; j < 4; j ++){
+      for( j = 0; j < 4; j++){
         b.push('tile black');
         b.push('tile white');
       }
@@ -24,9 +24,28 @@ export default Controller.extend({
   }),
 
   tiles: computed('board', 'fen', function() {
-    console.log("papa is dom");
     var b = get(this,'board').toArray();
-    b[0] = b[0] + ' '  + this.fenToMbn('r');
+    var fen = get(this,'fen');
+    console.log(fen);
+    fen = fen.replace(/ .+$/,'');
+    fen = fen.replace(/\//g,'');
+    console.log(fen);
+
+    var i;
+    var index=0;
+    for( i = 0; i < fen.length; i++){
+      var f= fen[i];
+      if(isNaN(f)){
+
+        b[index] = b[index] + ' '  + this.fenToMbn(f);
+        index++;
+      } else{
+        index = index + Number(f);
+
+
+      }
+    }
+
     return b;
   }),
 
