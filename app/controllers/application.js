@@ -4,7 +4,7 @@ import { computed, get } from '@ember/object';
 
 export default Controller.extend({
   queryParams: ['fen'],
-  fen: null,
+  fen: '',
 
   board: computed(function() {
     var b =[];
