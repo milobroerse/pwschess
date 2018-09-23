@@ -1,5 +1,5 @@
 import Controller from '@ember/controller';
-import { computed } from '@ember/object';
+import { computed, get } from '@ember/object';
 
 
 export default Controller.extend({
@@ -8,28 +8,36 @@ export default Controller.extend({
 
   board: computed(function() {
     var b =[];
-    for(var i = 0; i < 4; i ++){
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
 
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
-      b.push('tile black');
-      b.push('tile white');
+    var i,j;
+    for( i = 0; i < 4; i ++){
+      for( j = 0; j < 4; j ++){
+        b.push('tile white');
+        b.push('tile black');
+      }
+      for( j = 0; j < 4; j ++){
+        b.push('tile black');
+        b.push('tile white');
+      }
     }
-
     return b;
-  })
+  }),
+
+  tiles: computed('board', 'fen', function() {
+    console.log("papa is dom");
+    var b = get(this,'board').toArray();
+    b[0] = b[0] + ' '  + this.fenToMbn('r');
+    return b;
+  }),
+
+  fenToMbn(fen){
+    var code = fen.toLowerCase();
+    if(code === fen){
+      return 'b' + code;
+    } else{
+      return 'w' + code;
+    }
+  }
 });
 
 
