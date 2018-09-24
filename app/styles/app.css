@@ -1,3 +1,16 @@
+.row {
+    display: flex;
+}
+
+.column1 {
+    flex: 25%;
+}
+
+.column3 {
+    flex: 25%;
+    text-align: right;
+}
+
 .board{
     margin-left: auto;
     margin-right: auto;
@@ -11,6 +24,7 @@
     height: 100px;
     background-size: contain;
 }
+
 .black{
     background-color: #4B9B99;
 }
