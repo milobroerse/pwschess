@@ -26,10 +26,8 @@ export default Controller.extend({
   tiles: computed('board', 'fen', function() {
     var b = get(this,'board').toArray();
     var fen = get(this,'fen');
-    console.log(fen);
     fen = fen.replace(/ .+$/,'');
     fen = fen.replace(/\//g,'');
-    console.log(fen);
 
     var i;
     var index=0;
@@ -56,7 +54,19 @@ export default Controller.extend({
     } else{
       return 'w' + code;
     }
-  }
+  },
+
+  fenInfo: computed('fen', function() {
+    var fen = get(this,'fen');
+    console.log(fen);
+    fen = fen.replace(/^.+? /,'');
+    var res = fen.split(" ");
+    console.log(fen);
+    var EnPassant = res[2];
+    EnPassant = EnPassant.replace(/-/g,'');
+    return {ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant}
+
+  })
 });
 
 
