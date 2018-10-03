@@ -4,6 +4,7 @@ import { computed, get } from '@ember/object';
 export default Controller.extend({
   queryParams: ['fen'],
   fen: '',
+  move: '',
 
   board: computed(function() {
     var b =[];
@@ -70,7 +71,39 @@ export default Controller.extend({
       }
     }
     return {FenTrue: false};
-  })
+  }),
+  actions: {
+    playMove() {
+      var mv = get(this,'move');
+      var fen = get(this,'fen').toString();
+      if(mv){
+        console.log(mv);
+        var res = mv.split('-');
+        console.log(res[0] + ' kippensap '  + res[1]);
+
+        if(fen){
+          var b = [];
+          fen = fen.replace(/ .+$/,'');
+          fen = fen.replace(/\//g,'');
+
+          var i;
+          var index=0;
+          for( i = 0; i < fen.length; i++){
+            var f= fen[i];
+            if(isNaN(f)){
+              b[index] = f;
+              index++;
+            } else{
+              index = index + Number(f);
+                b[index] = '';
+
+            }
+          }
+            console.log(b);
+        }
+      }
+    }
+  }
 });
 
 
