@@ -82,6 +82,7 @@ export default Controller.extend({
         console.log(res[0] + ' kippensap '  + res[1]);
 
         if(fen){
+          //fen--->b
           var b = [];
           fen = fen.replace(/ .+$/,'');
           fen = fen.replace(/\//g,'');
@@ -94,12 +95,39 @@ export default Controller.extend({
               b[index] = f;
               index++;
             } else{
-              index = index + Number(f);
-                b[index] = '';
-
+              for(var j = 0; j < Number(f); j++){
+                b[index] = 1;
+                index++;
+              }
             }
           }
-            console.log(b);
+          console.log(b);
+          //b--->fen
+          var newfen = '';
+          var loopCount = 0;
+          for( i = 0; i < 8; i++){
+            var tempNumber = 0;
+            for(var p = 0; p < 8; p++){
+              var x = b[loopCount];
+              loopCount++;
+              if(isNaN(x)){
+                if(tempNumber){
+                  newfen = newfen + tempNumber;
+                }
+                newfen = newfen + x;
+                tempNumber = 0;
+              } else  {
+                tempNumber++;
+              }
+            }
+            if(tempNumber){
+              newfen = newfen + tempNumber;
+            }
+            if(i < 7){
+              newfen = newfen + '/';
+            }
+          }
+          console.log(newfen);
         }
       }
     }
