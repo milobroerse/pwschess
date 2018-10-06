@@ -1,5 +1,5 @@
 import Controller from '@ember/controller';
-import { computed, get } from '@ember/object';
+import { computed, get, set} from '@ember/object';
 
 export default Controller.extend({
   queryParams: ['fen'],
@@ -58,6 +58,17 @@ export default Controller.extend({
     }
   },
 
+  algebraicToIndex(alg){
+    var ply = alg.split("");
+    var x = ply[0].toLowerCase().charCodeAt(0) - 96;
+    var y = ply[1];
+    var index = (8-y)*8+x-1;
+
+
+    return(index);
+
+  },
+
   fenInfo: computed('fen', function() {
     var fen = get(this,'fen').toString();
     if(fen){
@@ -102,6 +113,9 @@ export default Controller.extend({
             }
           }
           console.log(b);
+          var ply = b[this.algebraicToIndex(res[0])];
+          b[this.algebraicToIndex(res[0])] = 1;
+          b[this.algebraicToIndex(res[1])] = ply;
           //b--->fen
           var newfen = '';
           var loopCount = 0;
@@ -128,6 +142,7 @@ export default Controller.extend({
             }
           }
           console.log(newfen);
+          set(this, "fen", newfen);
         }
       }
     }
