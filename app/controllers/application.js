@@ -95,8 +95,16 @@ export default Controller.extend({
         if(fen){
           //fen--->b
           var b = [];
+          var info = fen;
           fen = fen.replace(/ .+$/,'');
           fen = fen.replace(/\//g,'');
+          info = info.replace(/^.+? /,'');
+          var extra = info.split(" ");
+          if(extra[0].toLowerCase() === 'w'){
+            extra[0] = 'b';
+          } else{
+            extra[0] = 'w';
+          }
 
           var i;
           var index=0;
@@ -113,9 +121,52 @@ export default Controller.extend({
             }
           }
           console.log(b);
-          var ply = b[this.algebraicToIndex(res[0])];
-          b[this.algebraicToIndex(res[0])] = 1;
-          b[this.algebraicToIndex(res[1])] = ply;
+          var fromIndex = this.algebraicToIndex(res[0]);
+          var toIndex = this.algebraicToIndex(res[1]);
+          var ply = b[fromIndex];
+          b[fromIndex] = 1;
+          b[toIndex] = ply;
+
+          //KingmoveNoCastlingWhite
+          if(ply === 'K'){
+            extra[1] = extra[1].replace(/K/,'');
+            extra[1] = extra[1].replace(/Q/,'');
+          }
+
+          //KingmoveNoCastlingBlack
+          if(ply === 'k'){
+            extra[1] = extra[1].replace(/k/,'');
+            extra[1] = extra[1].replace(/q/,'');
+          }
+
+          //RookMoveNoCastlingWhite
+          if(ply === 'R'){
+            if(fromIndex === 56){
+              extra[1] = extra[1].replace(/Q/,'');
+
+            }
+            if(fromIndex === 63){
+              extra[1] = extra[1].replace(/K/,'');
+
+            }
+          }
+
+          //RookMoveNoCastlingBlack
+          if(ply === 'r'){
+            if(fromIndex === 0){
+              extra[1] = extra[1].replace(/q/,'');
+
+            }
+            if(fromIndex === 7){
+              extra[1] = extra[1].replace(/k/,'');
+
+            }
+          }
+
+          if(!extra[1]){
+            extra[1] = '-';
+
+          }
           //b--->fen
           var newfen = '';
           var loopCount = 0;
@@ -141,8 +192,10 @@ export default Controller.extend({
               newfen = newfen + '/';
             }
           }
+          newfen = newfen + ' '+ extra.join(' ');
           console.log(newfen);
           set(this, "fen", newfen);
+
         }
       }
     }
