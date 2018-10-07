@@ -64,7 +64,6 @@ export default Controller.extend({
     var y = ply[1];
     var index = (8-y)*8+x-1;
 
-
     return(index);
 
   },
@@ -127,16 +126,36 @@ export default Controller.extend({
           b[fromIndex] = 1;
           b[toIndex] = ply;
 
-          //KingmoveNoCastlingWhite
+          //CastlingWhite
           if(ply === 'K'){
+            //NoCastling
             extra[1] = extra[1].replace(/K/,'');
             extra[1] = extra[1].replace(/Q/,'');
+            //Castle
+            if(toIndex === 62){
+                b[63] = 1;
+                b[61] = 'R';
+            }
+            if(toIndex === 58){
+              b[56] = 1;
+              b[59] = 'R';
+            }
           }
 
-          //KingmoveNoCastlingBlack
+          //CastlingBlack
           if(ply === 'k'){
+            //NoCastling
             extra[1] = extra[1].replace(/k/,'');
             extra[1] = extra[1].replace(/q/,'');
+            //Castle
+            if(toIndex === 2){
+                b[0] = 1;
+                b[3] = 'r';
+            }
+            if(toIndex === 6){
+              b[7] = 1;
+              b[5] = 'r';
+            }
           }
 
           //RookMoveNoCastlingWhite
