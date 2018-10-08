@@ -3,7 +3,7 @@ import { computed, get, set} from '@ember/object';
 
 export default Controller.extend({
   queryParams: ['fen'],
-  fen: '',
+  fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   move: '',
 
   board: computed(function() {
@@ -65,6 +65,16 @@ export default Controller.extend({
     var index = (8-y)*8+x-1;
 
     return(index);
+
+  },
+
+  indexToAlgebraic(index){
+    var t = (index % 8) + 1 ;
+    var y = 8 - (Math.floor(index / 8));
+    var x = String.fromCharCode(t + 96);
+    console.log(x);
+    console.log(y);
+    return(x+y);
 
   },
 
@@ -181,11 +191,24 @@ export default Controller.extend({
 
             }
           }
+          extra[2] = '-';
+          if(ply === 'p' || ply === 'P'){
+            var div = fromIndex-toIndex;
+            console.log(div);
+            if(div === 16){
+              extra[2] = this.indexToAlgebraic(fromIndex - 8);
+              console.log(extra[2]);
+            }
+            if(div === -16){
+              extra[2] = this.indexToAlgebraic(fromIndex + 8);
+              console.log(extra[2]);
+            }
+          }
 
           if(!extra[1]){
             extra[1] = '-';
-
           }
+
           //b--->fen
           var newfen = '';
           var loopCount = 0;
