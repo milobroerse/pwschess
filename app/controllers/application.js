@@ -96,6 +96,32 @@ export default Controller.extend({
           }
         }
       }
+
+      if(ply === 'p'){
+        if(toIndex - fromIndex === 8 && b[toIndex] == '1'){
+          valid = true;
+          console.log('true5');
+        }
+        if(uci[1] == '7' && toIndex - fromIndex === 16 && b[toIndex] == '1' && b[fromIndex+8] === 1){
+          valid = true;
+          console.log('true6');
+        }
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && b[fromIndex] !== 1 && uci[3]-uci[1] === 1) {
+          valid = true;
+          console.log('true7');
+        }
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && b[fromIndex] !== 1 && uci[3]-uci[1] === 1){
+          if(fenInfo.EnPassant === res[1]){
+            valid = true;
+          console.log('true8');
+          }
+        }
+      }
+
+
+
+
+
     }
     return valid;
 
