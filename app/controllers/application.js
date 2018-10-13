@@ -22,28 +22,48 @@ export default Controller.extend({
     }
     return b;
   }),
-
-  tiles: computed('board', 'fen', function() {
-    var b = get(this,'board').toArray();
+  boardArray: computed('fen', function(){
     var fen = get(this,'fen').toString();
+    var b = [];
 
-    if(fen){
-      fen = fen.replace(/ .+$/,'');
-      fen = fen.replace(/\//g,'');
+    fen = fen.replace(/ .+$/,'');
+    fen = fen.replace(/\//g,'');
 
-      var i;
-      var index=0;
-      for( i = 0; i < fen.length; i++){
-        var f= fen[i];
-        if(isNaN(f)){
-          b[index] = b[index] + ' '  + this.fenToMbn(f);
+
+    var i;
+    var index=0;
+    for( i = 0; i < fen.length; i++){
+      var f= fen[i];
+      if(isNaN(f)){
+        b[index] = f;
+        index++;
+      } else{
+        for(var j = 0; j < Number(f); j++){
+          b[index] = 1;
           index++;
-        } else{
-          index = index + Number(f);
         }
       }
-      if(index !== 64){
-        return get(this,'board').toArray();
+    }
+
+    if(index !== 64){
+      var k;
+      b = [];
+      for( k = 0; k < 64; k++){
+        b[k] = 1;
+      }
+    }
+    return b;
+  }),
+
+  tiles: computed('board', 'boardArray', function() {
+    var b = get(this,'board').toArray();
+    var boardArray = get(this,'boardArray').toArray();
+    var i;
+
+    for( i = 0; i < boardArray.length; i++){
+      var f = boardArray[i];
+      if(f !== 1){
+        b[i] = b[i] + ' '  + this.fenToMbn(f);
       }
     }
     return b;
