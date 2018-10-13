@@ -92,8 +92,6 @@ export default Controller.extend({
     var t = (index % 8) + 1 ;
     var y = 8 - (Math.floor(index / 8));
     var x = String.fromCharCode(t + 96);
-    console.log(x);
-    console.log(y);
     return(x+y);
 
   },
@@ -117,13 +115,16 @@ export default Controller.extend({
       var mv = get(this,'move');
       var fen = get(this,'fen').toString();
       if(mv){
-        console.log(mv);
-        var res = mv.split('-');
-        console.log(res[0] + ' kippensap '  + res[1]);
+        var uci = mv.split('');
+        var res = [];
+
+        res[0] = uci[0] + uci[1];
+        res[1] = uci[2] + uci[3];
+        res[2] = uci[4];
 
         if(fen){
           //fen--->b
-          var b = [];
+          var b = get(this,'boardArray');
           var info = fen;
           fen = fen.replace(/ .+$/,'');
           fen = fen.replace(/\//g,'');
@@ -135,20 +136,6 @@ export default Controller.extend({
             extra[0] = 'w';
           }
 
-          var i;
-          var index=0;
-          for( i = 0; i < fen.length; i++){
-            var f= fen[i];
-            if(isNaN(f)){
-              b[index] = f;
-              index++;
-            } else{
-              for(var j = 0; j < Number(f); j++){
-                b[index] = 1;
-                index++;
-              }
-            }
-          }
           console.log(b);
           var fromIndex = this.algebraicToIndex(res[0]);
           var toIndex = this.algebraicToIndex(res[1]);
@@ -212,16 +199,23 @@ export default Controller.extend({
             }
           }
           extra[2] = '-';
-          if(ply === 'p' || ply === 'P'){
-            var div = fromIndex-toIndex;
-            console.log(div);
-            if(div === 16){
-              extra[2] = this.indexToAlgebraic(fromIndex - 8);
-              console.log(extra[2]);
+
+
+          if(ply === 'P'){
+            if(toIndex < 8){
+              b[toIndex] = res[2].toUpperCase();
             }
-            if(div === -16){
+            if(fromIndex-toIndex === 16){
+              extra[2] = this.indexToAlgebraic(fromIndex - 8);
+            }
+          }
+
+          if(ply === 'p'){
+            if(toIndex > 55){
+              b[toIndex] = res[2].toLowerCase();
+            }
+            if(toIndex-fromIndex === 16){
               extra[2] = this.indexToAlgebraic(fromIndex + 8);
-              console.log(extra[2]);
             }
           }
 
@@ -232,7 +226,7 @@ export default Controller.extend({
           //b--->fen
           var newfen = '';
           var loopCount = 0;
-          for( i = 0; i < 8; i++){
+          for(var i = 0; i < 8; i++){
             var tempNumber = 0;
             for(var p = 0; p < 8; p++){
               var x = b[loopCount];
@@ -255,7 +249,6 @@ export default Controller.extend({
             }
           }
           newfen = newfen + ' '+ extra.join(' ');
-          console.log(newfen);
           set(this, "fen", newfen);
 
         }
