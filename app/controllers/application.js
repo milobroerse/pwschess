@@ -55,6 +55,57 @@ export default Controller.extend({
     return b;
   }),
 
+
+
+
+  validMove: computed('move', 'boardArray', 'fenInfo',function(){
+    var fenInfo = get(this, 'fenInfo');
+    console.log(fenInfo);
+    var mv = get(this,'move');
+    var valid = false;
+    if(mv && mv.length > 3){
+      mv = mv.toLowerCase();
+      var uci = mv.split('');
+      var res = [];
+
+      res[0] = uci[0] + uci[1];
+      res[1] = uci[2] + uci[3];
+      res[2] = uci[4];
+
+      var b = get(this,'boardArray');
+      var fromIndex = this.algebraicToIndex(res[0]);
+      var toIndex = this.algebraicToIndex(res[1]);
+      var ply = b[fromIndex];
+      if(ply === 'P'){
+        if(fromIndex - toIndex === 8 && b[toIndex] == '1'){
+          valid = true;
+          console.log('true1');
+        }
+        if(uci[1] == '2' && fromIndex - toIndex === 16 && b[toIndex] == '1' && b[fromIndex-8] === 1){
+          valid = true;
+          console.log('true2');
+        }
+        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && b[toIndex] !== 1 && uci[3]-uci[1] === 1) {
+          valid = true;
+          console.log('true3');
+        }
+        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && b[toIndex] !== 1 && uci[3]-uci[1] === 1){
+          if(fenInfo.EnPassant === res[1]){
+            valid = true;
+          console.log('true4');
+          }
+        }
+      }
+    }
+    return valid;
+
+  }),
+
+
+
+
+
+
   tiles: computed('board', 'boardArray', function() {
     var b = get(this,'board').toArray();
     var boardArray = get(this,'boardArray').toArray();

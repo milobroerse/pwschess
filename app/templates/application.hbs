@@ -2,7 +2,8 @@
 
 <div class = "column1">
 {{input type="text" value=fen placeholder="Vul hier een FEN in" size=60}}
-{{input type="text" value=move placeholder="" size=30}}
+
+{{input class = (unless validMove 'valid') type="text" value=move placeholder="" size=30}}
 <button {{action "playMove"}}>Move</button>
 </div>
 
