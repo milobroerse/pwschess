@@ -76,6 +76,9 @@ export default Controller.extend({
       var fromIndex = this.algebraicToIndex(res[0]);
       var toIndex = this.algebraicToIndex(res[1]);
       var ply = b[fromIndex];
+
+
+      //white pawn check
       if(ply === 'P'){
         if(fromIndex - toIndex === 8 && b[toIndex] == '1'){
           valid = true;
@@ -96,7 +99,7 @@ export default Controller.extend({
           }
         }
       }
-
+      //black pawn check
       if(ply === 'p'){
         if(toIndex - fromIndex === 8 && b[toIndex] == '1'){
           valid = true;
@@ -115,6 +118,38 @@ export default Controller.extend({
             valid = true;
           console.log('true8');
           }
+        }
+      }
+
+      //white knight check
+      if(ply === 'N'){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
+          valid = true;
+        }
+      }
+
+      //black knight check
+      if(ply === 'n'){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
+          valid = true;
         }
       }
 
