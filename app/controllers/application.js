@@ -29,7 +29,6 @@ export default Controller.extend({
     fen = fen.replace(/ .+$/,'');
     fen = fen.replace(/\//g,'');
 
-
     var i;
     var index=0;
     for( i = 0; i < fen.length; i++){
@@ -55,15 +54,13 @@ export default Controller.extend({
     return b;
   }),
 
-
-
-
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
     var fenInfo = get(this, 'fenInfo');
     console.log(fenInfo);
     var mv = get(this,'move');
     var valid = false;
     if(mv && mv.length > 3){
+      var b = get(this,'boardArray');
       mv = mv.toLowerCase();
       var uci = mv.split('');
       var res = [];
@@ -72,11 +69,17 @@ export default Controller.extend({
       res[1] = uci[2] + uci[3];
       res[2] = uci[4];
 
-      var b = get(this,'boardArray');
       var fromIndex = this.algebraicToIndex(res[0]);
       var toIndex = this.algebraicToIndex(res[1]);
       var ply = b[fromIndex];
-
+      if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
+        console.log('false');
+        return false;
+      }
+      if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
+        console.log('false');
+        return false;
+      }
 
       //white pawn check
       if(ply === 'P'){
@@ -99,6 +102,7 @@ export default Controller.extend({
           }
         }
       }
+
       //black pawn check
       if(ply === 'p'){
         if(toIndex - fromIndex === 8 && b[toIndex] == '1'){
@@ -152,20 +156,9 @@ export default Controller.extend({
           valid = true;
         }
       }
-
-
-
-
-
     }
     return valid;
-
   }),
-
-
-
-
-
 
   tiles: computed('board', 'boardArray', function() {
     var b = get(this,'board').toArray();
@@ -181,33 +174,6 @@ export default Controller.extend({
     return b;
   }),
 
-  fenToMbn(fen){
-    var code = fen.toLowerCase();
-    if(code === fen){
-      return 'b' + code;
-    } else{
-      return 'w' + code;
-    }
-  },
-
-  algebraicToIndex(alg){
-    var ply = alg.split("");
-    var x = ply[0].toLowerCase().charCodeAt(0) - 96;
-    var y = ply[1];
-    var index = (8-y)*8+x-1;
-
-    return(index);
-
-  },
-
-  indexToAlgebraic(index){
-    var t = (index % 8) + 1 ;
-    var y = 8 - (Math.floor(index / 8));
-    var x = String.fromCharCode(t + 96);
-    return(x+y);
-
-  },
-
   fenInfo: computed('fen', function() {
     var fen = get(this,'fen').toString();
     if(fen){
@@ -222,6 +188,53 @@ export default Controller.extend({
     }
     return {FenTrue: false};
   }),
+
+  isBlack(ply){
+    if(ply === 'p' ||ply === 'n' ||ply === 'b'||ply === 'r'||ply === 'q'||ply === 'k'){
+      return true;
+    } else{
+      return false;
+    }
+  },
+
+  isWhite(ply){
+    if(ply === 'P' ||ply === 'N' ||ply === 'B'||ply === 'R'||ply === 'Q'||ply === 'K'){
+      return true;
+    } else{
+      return false;
+    }
+  },
+
+  uciToNumber(uci){
+     return uci.toLowerCase().charCodeAt(0) - 96;
+
+  },
+
+  fenToMbn(fen){
+    var code = fen.toLowerCase();
+    if(code === fen){
+      return 'b' + code;
+    } else{
+      return 'w' + code;
+    }
+  },
+
+  algebraicToIndex(alg){
+    var ply = alg.split("");
+    var x = this.uciToNumber(ply[0]);
+    var y = ply[1];
+    var index = (8-y)*8+x-1;
+
+    return(index);
+  },
+
+  indexToAlgebraic(index){
+    var t = (index % 8) + 1 ;
+    var y = 8 - (Math.floor(index / 8));
+    var x = String.fromCharCode(t + 96);
+    return(x+y);
+  },
+
   actions: {
     playMove() {
       var mv = get(this,'move');
