@@ -73,11 +73,15 @@ export default Controller.extend({
       var toIndex = this.algebraicToIndex(res[1]);
       var ply = b[fromIndex];
       if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        console.log('false');
+        console.log('false1');
         return false;
       }
       if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        console.log('false');
+        console.log('false2');
+        return false;
+      }
+      if(uci[3] < 1 || uci[3] > 8){
+        console.log('false3')
         return false;
       }
 
@@ -119,7 +123,7 @@ export default Controller.extend({
         }
         if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && b[fromIndex] !== 1 && uci[3]-uci[1] === 1){
           if(fenInfo.EnPassant === res[1]){
-            valid = true;
+          valid = true;
           console.log('true8');
           }
         }
@@ -129,15 +133,19 @@ export default Controller.extend({
       if(ply === 'N'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
           valid = true;
+          console.log('true9');
         }
         if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
           valid = true;
+          console.log('true10');
         }
         if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
           valid = true;
+          console.log('true11');
         }
         if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
           valid = true;
+          console.log('true12');
         }
       }
 
@@ -145,18 +153,41 @@ export default Controller.extend({
       if(ply === 'n'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
           valid = true;
+          console.log('true13');
         }
         if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
           valid = true;
+          console.log('true14');
         }
         if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
           valid = true;
+          console.log('true15');
         }
         if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
           valid = true;
+          console.log('true16');
+        }
+      }
+      if(ply === 'K'){
+        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7)  && uci[3]-uci[1] === 1){
+          valid = true;
+          console.log('true17');
+        }
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7)  && uci[3]-uci[1] === -1){
+          valid = true;
+          console.log('true18');
+        }
+        if(toIndex - fromIndex === 1  && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
+          valid = true;
+          console.log('true19');
+        }
+        if(toIndex - fromIndex === -1  && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
+          valid = true;
+          console.log('true20');
         }
       }
     }
+
     return valid;
   }),
 
