@@ -73,117 +73,136 @@ export default Controller.extend({
       var toIndex = this.algebraicToIndex(res[1]);
       var ply = b[fromIndex];
       if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        console.log('false1');
         return false;
       }
       if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        console.log('false2');
         return false;
       }
       if(uci[3] < 1 || uci[3] > 8){
-        console.log('false3')
         return false;
       }
 
       //white pawn check
       if(ply === 'P'){
-        if(fromIndex - toIndex === 8 && b[toIndex] == '1'){
+        // e2e3
+        if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
-          console.log('true1');
         }
-        if(uci[1] == '2' && fromIndex - toIndex === 16 && b[toIndex] == '1' && b[fromIndex-8] === 1){
+        // e2e4
+        if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
           valid = true;
-          console.log('true2');
         }
-        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && b[toIndex] !== 1 && uci[3]-uci[1] === 1) {
+        // e4d5
+        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
           valid = true;
-          console.log('true3');
         }
-        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && b[toIndex] !== 1 && uci[3]-uci[1] === 1){
+        // e5d6
+        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           if(fenInfo.EnPassant === res[1]){
             valid = true;
-          console.log('true4');
+          }
+        }
+        // e7e8 || e7d8
+        if(uci[3] == 8 && valid === true){
+          valid = false;
+          if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+            valid = true;
           }
         }
       }
 
       //black pawn check
       if(ply === 'p'){
-        if(toIndex - fromIndex === 8 && b[toIndex] == '1'){
+        // d7d6
+        if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
-          console.log('true5');
         }
-        if(uci[1] == '7' && toIndex - fromIndex === 16 && b[toIndex] == '1' && b[fromIndex+8] === 1){
+        // d7d5
+        if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
           valid = true;
-          console.log('true6');
         }
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && b[fromIndex] !== 1 && uci[3]-uci[1] === 1) {
+        // d5e4
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
           valid = true;
-          console.log('true7');
         }
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && b[fromIndex] !== 1 && uci[3]-uci[1] === 1){
+        // d4e3
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           if(fenInfo.EnPassant === res[1]){
           valid = true;
-          console.log('true8');
+          }
+        }
+        // d2d1 || d2e1
+        if(uci[3] == 1 && valid === true){
+          valid = false;
+          if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+            valid = true;
           }
         }
       }
 
-      //white knight check
+      //white knight check all jumps
       if(ply === 'N'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
-          console.log('true9');
         }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
           valid = true;
-          console.log('true10');
         }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
-          console.log('true11');
         }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
-          console.log('true12');
         }
       }
 
-      //black knight check
+      //black knight check all jumps
       if(ply === 'n'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15)  && uci[3]-uci[1] === 2){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
           console.log('true13');
         }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && uci[3]-uci[1] === -2){
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
           valid = true;
           console.log('true14');
         }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && uci[3]-uci[1] === 1){
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
           console.log('true15');
         }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && uci[3]-uci[1] === -1){
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
           console.log('true16');
         }
       }
+      //white king check
       if(ply === 'K'){
-        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7)  && uci[3]-uci[1] === 1){
+        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
-          console.log('true17');
         }
-        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7)  && uci[3]-uci[1] === -1){
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
-          console.log('true18');
         }
-        if(toIndex - fromIndex === 1  && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
+        if(toIndex - fromIndex === 1 && this.isBlackOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
           valid = true;
-          console.log('true19');
         }
-        if(toIndex - fromIndex === -1  && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
+        if(toIndex - fromIndex === -1 && this.isBlackOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
           valid = true;
-          console.log('true20');
+        }
+      }
+      //black king check
+      if(ply === 'k'){
+        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+          valid = true;
+        }
+        if(toIndex - fromIndex === 1 && this.isWhiteOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
+          valid = true;
+        }
+        if(toIndex - fromIndex === -1 && this.isWhiteOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
+          valid = true;
         }
       }
     }
@@ -220,6 +239,10 @@ export default Controller.extend({
     return {FenTrue: false};
   }),
 
+  isEmpty(ply){
+    return ply === 1;
+  },
+
   isBlack(ply){
     if(ply === 'p' ||ply === 'n' ||ply === 'b'||ply === 'r'||ply === 'q'||ply === 'k'){
       return true;
@@ -228,12 +251,20 @@ export default Controller.extend({
     }
   },
 
+  isBlackOrEmpty(ply){
+   return this.isBlack(ply) || ply === 1;
+  },
+
   isWhite(ply){
     if(ply === 'P' ||ply === 'N' ||ply === 'B'||ply === 'R'||ply === 'Q'||ply === 'K'){
       return true;
     } else{
       return false;
     }
+  },
+
+  isWhiteOrEmpty(ply){
+   return this.isWhite(ply) || ply === 1;
   },
 
   uciToNumber(uci){
