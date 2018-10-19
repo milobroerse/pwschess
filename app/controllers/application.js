@@ -84,25 +84,25 @@ export default Controller.extend({
 
       //white pawn check
       if(ply === 'P'){
-        // e2e3
+        //e2e3
         if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
         }
-        // e2e4
+        //e2e4
         if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
           valid = true;
         }
-        // e4d5
+        //e4d5
         if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
           valid = true;
         }
-        // e5d6
+        //e5d6
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           if(fenInfo.EnPassant === res[1]){
             valid = true;
           }
         }
-        // e7e8 || e7d8
+        //e7e8 || e7d8
         if(uci[3] == 8 && valid === true){
           valid = false;
           if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
@@ -110,22 +110,21 @@ export default Controller.extend({
           }
         }
       }
-
       //black pawn check
       if(ply === 'p'){
         // d7d6
         if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
         }
-        // d7d5
+        //d7d5
         if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
           valid = true;
         }
-        // d5e4
+        //d5e4
         if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
           valid = true;
         }
-        // d4e3
+        //d4e3
         if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           if(fenInfo.EnPassant === res[1]){
           valid = true;
@@ -139,7 +138,6 @@ export default Controller.extend({
           }
         }
       }
-
       //white knight check all jumps
       if(ply === 'N'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
@@ -155,24 +153,19 @@ export default Controller.extend({
           valid = true;
         }
       }
-
       //black knight check all jumps
       if(ply === 'n'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
-          console.log('true13');
         }
         if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
           valid = true;
-          console.log('true14');
         }
         if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
-          console.log('true15');
         }
         if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
-          console.log('true16');
         }
       }
       //white king check
@@ -205,8 +198,13 @@ export default Controller.extend({
           valid = true;
         }
       }
+      //white queen check
+      if(ply === 'Q'){
+        if(this.lineCheck(fromIndex, toIndex, b) && this.isBlackOrEmpty(b[toIndex])){
+          valid = true;
+        }
+      }
     }
-
     return valid;
   }),
 
@@ -238,6 +236,26 @@ export default Controller.extend({
     }
     return {FenTrue: false};
   }),
+
+  lineCheck(fromIndex, toIndex, b){
+
+    var t1 = Math.floor(fromIndex / 8);
+    var t2 = (fromIndex % 8);
+    var t3 = Math.floor(toIndex / 8);
+    var t4 = (toIndex % 8);
+    console.log(t1 + ' ' + t2 + ' ' + t3 + ' ' + t4);
+    console.log(fromIndex + ' ' + toIndex);
+    if(toIndex < fromIndex){
+      for(var i = toIndex; i < fromIndex; i = i + 1 + (t1-t3) + (t4-t2)){
+        console.log(i);
+      }
+    } else{
+      for(var j = fromIndex; j < toIndex; j = j + 1 + (t3-t1) + (t2-t4)){
+        console.log(j);
+      }
+    }
+  },
+
 
   isEmpty(ply){
     return ply === 1;
