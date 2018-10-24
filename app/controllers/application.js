@@ -170,32 +170,26 @@ export default Controller.extend({
       }
       //white king check
       if(piece === 'K'){
-        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          valid = true;
-        }
-        if(toIndex - fromIndex === 1 && this.isBlackOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
-          valid = true;
-        }
-        if(toIndex - fromIndex === -1 && this.isBlackOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
-          valid = true;
+        if(((toIndex === 58 && fenInfo.CastlingWq) || (toIndex === 62 && fenInfo.CastlingWk)) && fromIndex === 60){
+          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+            valid = true;
+          }
+        } else {
+          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
+            valid = true;
+          }
         }
       }
       //black king check
       if(piece === 'k'){
-        if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 8 || toIndex - fromIndex === 7) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          valid = true;
-        }
-        if(toIndex - fromIndex === 1 && this.isWhiteOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === 1){
-          valid = true;
-        }
-        if(toIndex - fromIndex === -1 && this.isWhiteOrEmpty(b[toIndex]) && this.uciToNumber(uci[2])-this.uciToNumber(uci[0]) === -1){
-          valid = true;
+        if(((toIndex === 2 && fenInfo.CastlingBq) || (toIndex === 6 && fenInfo.CastlingBk)) && fromIndex === 4){
+          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+            valid = true;
+          }
+        } else {
+          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
+            valid = true;
+          }
         }
       }
       //white queen check
@@ -283,6 +277,12 @@ export default Controller.extend({
     }
 
     if(piece === 'K'|| piece === 'k'){
+      if(difX > 1 || difY > 1){
+        return false;
+      }
+    }
+
+    if(piece === 'K0-0'|| piece === 'k0-0'){
       if(difX !== 2 && difY !== 0){
         return false;
       }
