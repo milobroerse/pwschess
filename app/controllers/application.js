@@ -71,7 +71,7 @@ export default Controller.extend({
 
       var fromIndex = this.algebraicToIndex(res[0]);
       var toIndex = this.algebraicToIndex(res[1]);
-      var ply = b[fromIndex];
+      var piece = b[fromIndex];
       if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
         return false;
       }
@@ -83,7 +83,7 @@ export default Controller.extend({
       }
 
       //white pawn check
-      if(ply === 'P'){
+      if(piece === 'P'){
         //e2e3
         if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
@@ -111,7 +111,7 @@ export default Controller.extend({
         }
       }
       //black pawn check
-      if(ply === 'p'){
+      if(piece === 'p'){
         // d7d6
         if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
@@ -139,7 +139,7 @@ export default Controller.extend({
         }
       }
       //white knight check all jumps
-      if(ply === 'N'){
+      if(piece === 'N'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
         }
@@ -154,7 +154,7 @@ export default Controller.extend({
         }
       }
       //black knight check all jumps
-      if(ply === 'n'){
+      if(piece === 'n'){
         if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
         }
@@ -169,7 +169,7 @@ export default Controller.extend({
         }
       }
       //white king check
-      if(ply === 'K'){
+      if(piece === 'K'){
         if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
         }
@@ -184,7 +184,7 @@ export default Controller.extend({
         }
       }
       //black king check
-      if(ply === 'k'){
+      if(piece === 'k'){
         if((toIndex - fromIndex === -9 ||  toIndex - fromIndex === -8 || toIndex - fromIndex === -7) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
         }
@@ -199,11 +199,19 @@ export default Controller.extend({
         }
       }
       //white queen check
-      if(ply === 'Q'){
-        if(this.lineCheck(fromIndex, toIndex, b) && this.isBlackOrEmpty(b[toIndex])){
+      if(piece === 'Q' || piece === 'R' || piece === 'B'){
+        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
           valid = true;
         }
       }
+      //black queen check
+      if(piece === 'q' || piece === 'r' || piece === 'b'){
+        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
+          valid = true;
+        }
+      }
+
+
     }
     return valid;
   }),
@@ -237,52 +245,84 @@ export default Controller.extend({
     return {FenTrue: false};
   }),
 
-  lineCheck(fromIndex, toIndex, b){
+  lineCheck(fromIndex, toIndex, b, piece){
+    var valid = true;
+    var fromX = fromIndex % 8;
+    var fromY = Math.floor(fromIndex / 8);
+    var toX = toIndex % 8;
+    var toY = Math.floor(toIndex / 8);
 
-    var t1 = Math.floor(fromIndex / 8);
-    var t2 = (fromIndex % 8);
-    var t3 = Math.floor(toIndex / 8);
-    var t4 = (toIndex % 8);
-    console.log(t1 + ' ' + t2 + ' ' + t3 + ' ' + t4);
-    console.log(fromIndex + ' ' + toIndex);
-    if(toIndex < fromIndex){
-      for(var i = toIndex; i < fromIndex; i = i + 1 + (t1-t3) + (t4-t2)){
-        console.log(i);
-      }
-    } else{
-      for(var j = fromIndex; j < toIndex; j = j + 1 + (t3-t1) + (t2-t4)){
-        console.log(j);
+    // nooit negatief
+    var difX = Math.abs(fromX - toX);
+    var difY = Math.abs(fromY - toY);
+
+    //neemt de hoogste waarde en daarna berekent de dif.
+    var maxXY = Math.max(difX, difY);
+    var difMove = toIndex - fromIndex;
+    var step = difMove / maxXY;
+
+
+    console.log(toIndex + ' : ' + fromX + ' ' + fromY + ' ' + toX + ' ' + toY + ' ' + difX + ' ' + difY + ' ' + maxXY + ' ' + difMove + ' ' + step);
+
+    if(piece === 'Q' || piece === 'q'){
+      if(difX !== 0 && difY !== 0 && difX !== difY){
+        return false;
       }
     }
+
+    if(piece === 'R'|| piece === 'r'){
+      if(difX !== 0 && difY !== 0){
+        return false;
+      }
+    }
+
+    if(piece === 'B'|| piece === 'b'){
+      if(difX !== difY){
+        return false;
+      }
+    }
+
+    if(piece === 'K'|| piece === 'k'){
+      if(difX !== 2 && difY !== 0){
+        return false;
+      }
+    }
+
+    for(var j = fromIndex + step; j !== toIndex; j = j + step) {
+      if(!this.isEmpty(b[j])){
+        valid = false;
+      }
+    }
+    return valid;
   },
 
 
-  isEmpty(ply){
-    return ply === 1;
+  isEmpty(piece){
+    return piece === 1;
   },
 
-  isBlack(ply){
-    if(ply === 'p' ||ply === 'n' ||ply === 'b'||ply === 'r'||ply === 'q'||ply === 'k'){
+  isBlack(piece){
+    if(piece === 'p' || piece === 'n' || piece === 'b'|| piece === 'r'|| piece === 'q'|| piece === 'k'){
       return true;
     } else{
       return false;
     }
   },
 
-  isBlackOrEmpty(ply){
-   return this.isBlack(ply) || ply === 1;
+  isBlackOrEmpty(piece){
+   return this.isBlack(piece) || piece === 1;
   },
 
-  isWhite(ply){
-    if(ply === 'P' ||ply === 'N' ||ply === 'B'||ply === 'R'||ply === 'Q'||ply === 'K'){
+  isWhite(piece){
+    if(piece === 'P' ||piece === 'N' ||piece === 'B'||piece === 'R'||piece === 'Q'||piece === 'K'){
       return true;
     } else{
       return false;
     }
   },
 
-  isWhiteOrEmpty(ply){
-   return this.isWhite(ply) || ply === 1;
+  isWhiteOrEmpty(piece){
+   return this.isWhite(piece) || piece === 1;
   },
 
   uciToNumber(uci){
@@ -300,9 +340,9 @@ export default Controller.extend({
   },
 
   algebraicToIndex(alg){
-    var ply = alg.split("");
-    var x = this.uciToNumber(ply[0]);
-    var y = ply[1];
+    var piece = alg.split("");
+    var x = this.uciToNumber(piece[0]);
+    var y = piece[1];
     var index = (8-y)*8+x-1;
 
     return(index);
@@ -344,12 +384,12 @@ export default Controller.extend({
           console.log(b);
           var fromIndex = this.algebraicToIndex(res[0]);
           var toIndex = this.algebraicToIndex(res[1]);
-          var ply = b[fromIndex];
+          var piece = b[fromIndex];
           b[fromIndex] = 1;
-          b[toIndex] = ply;
+          b[toIndex] = piece;
 
           //CastlingWhite
-          if(ply === 'K'){
+          if(piece === 'K'){
             //NoCastling
             extra[1] = extra[1].replace(/K/,'');
             extra[1] = extra[1].replace(/Q/,'');
@@ -365,7 +405,7 @@ export default Controller.extend({
           }
 
           //CastlingBlack
-          if(ply === 'k'){
+          if(piece === 'k'){
             //NoCastling
             extra[1] = extra[1].replace(/k/,'');
             extra[1] = extra[1].replace(/q/,'');
@@ -381,7 +421,7 @@ export default Controller.extend({
           }
 
           //RookMoveNoCastlingWhite
-          if(ply === 'R'){
+          if(piece === 'R'){
             if(fromIndex === 56){
               extra[1] = extra[1].replace(/Q/,'');
 
@@ -393,7 +433,7 @@ export default Controller.extend({
           }
 
           //RookMoveNoCastlingBlack
-          if(ply === 'r'){
+          if(piece === 'r'){
             if(fromIndex === 0){
               extra[1] = extra[1].replace(/q/,'');
 
@@ -406,7 +446,7 @@ export default Controller.extend({
           extra[2] = '-';
 
 
-          if(ply === 'P'){
+          if(piece === 'P'){
             if(toIndex < 8){
               b[toIndex] = res[2].toUpperCase();
             }
@@ -415,7 +455,7 @@ export default Controller.extend({
             }
           }
 
-          if(ply === 'p'){
+          if(piece === 'p'){
             if(toIndex > 55){
               b[toIndex] = res[2].toLowerCase();
             }
