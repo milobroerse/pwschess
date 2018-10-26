@@ -61,10 +61,10 @@ export default Controller.extend({
     var mv = get(this,'move');
     var valid = false;
     if(mv && mv.length > 3){
-      var b = get(this,'boardArray');
+      var b = get(this,'boardArray').toArray();
       if(this.checkValid(mv, fenInfo, b)){
         var setFen = false;
-      //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
+        var bNew = this.makeMove(mv, fenInfo, b, setFen);
         valid = true;
 
       } else{
