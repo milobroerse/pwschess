@@ -22,6 +22,7 @@ export default Controller.extend({
     }
     return b;
   }),
+
   boardArray: computed('fen', function(){
     var fen = get(this,'fen').toString();
     var b = [];
@@ -61,152 +62,17 @@ export default Controller.extend({
     var valid = false;
     if(mv && mv.length > 3){
       var b = get(this,'boardArray');
-      mv = mv.toLowerCase();
-      var uci = mv.split('');
-      var res = [];
+      if(this.checkValid(mv, fenInfo, b)){
+        var setFen = false;
+      //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
+        valid = true;
 
-      res[0] = uci[0] + uci[1];
-      res[1] = uci[2] + uci[3];
-      res[2] = uci[4];
-
-      var fromIndex = this.algebraicToIndex(res[0]);
-      var toIndex = this.algebraicToIndex(res[1]);
-      var piece = b[fromIndex];
-      if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        return false;
+      } else{
+        valid = false;
       }
-      if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        return false;
-      }
-      if(uci[3] < 1 || uci[3] > 8){
-        return false;
-      }
-
-      //white pawn check
-      if(piece === 'P'){
-        //e2e3
-        if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
-        //e2e4
-        if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
-          valid = true;
-        }
-        //e4d5
-        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
-          valid = true;
-        }
-        //e5d6
-        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          if(fenInfo.EnPassant === res[1]){
-            valid = true;
-          }
-        }
-        //e7e8 || e7d8
-        if(uci[3] == 8 && valid === true){
-          valid = false;
-          if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
-            valid = true;
-          }
-        }
-      }
-      //black pawn check
-      if(piece === 'p'){
-        // d7d6
-        if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
-        //d7d5
-        if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
-          valid = true;
-        }
-        //d5e4
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
-          valid = true;
-        }
-        //d4e3
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          if(fenInfo.EnPassant === res[1]){
-          valid = true;
-          }
-        }
-        // d2d1 || d2e1
-        if(uci[3] == 1 && valid === true){
-          valid = false;
-          if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
-            valid = true;
-          }
-        }
-      }
-      //white knight check all jumps
-      if(piece === 'N'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
-          valid = true;
-        }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          valid = true;
-        }
-      }
-      //black knight check all jumps
-      if(piece === 'n'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
-          valid = true;
-        }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          valid = true;
-        }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          valid = true;
-        }
-      }
-      //white king check
-      if(piece === 'K'){
-        if(((toIndex === 58 && fenInfo.CastlingWq) || (toIndex === 62 && fenInfo.CastlingWk)) && fromIndex === 60){
-          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            valid = true;
-          }
-        } else {
-          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-            valid = true;
-          }
-        }
-      }
-      //black king check
-      if(piece === 'k'){
-        if(((toIndex === 2 && fenInfo.CastlingBq) || (toIndex === 6 && fenInfo.CastlingBk)) && fromIndex === 4){
-          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            valid = true;
-          }
-        } else {
-          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-            valid = true;
-          }
-        }
-      }
-      //white queen check
-      if(piece === 'Q' || piece === 'R' || piece === 'B'){
-        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-          valid = true;
-        }
-      }
-      //black queen check
-      if(piece === 'q' || piece === 'r' || piece === 'b'){
-        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-          valid = true;
-        }
-      }
-
-
     }
+
+
     return valid;
   }),
 
@@ -227,18 +93,315 @@ export default Controller.extend({
   fenInfo: computed('fen', function() {
     var fen = get(this,'fen').toString();
     if(fen){
+      var orgFen = fen;
       fen = fen.replace(/^.+? /,'');
       var res = fen.split(" ");
 
       if(res.length == 5){
         var EnPassant = res[2];
         EnPassant = EnPassant.replace(/-/g,'');
-        return {FenTrue: true, ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant}
+        return {FenTrue: true, Fen: orgFen, ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant}
       }
     }
     return {FenTrue: false};
   }),
 
+  checkValid(mv, fenInfo, b){
+    var valid = false;
+    mv = mv.toLowerCase();
+    var uci = mv.split('');
+    var res = [];
+
+    res[0] = uci[0] + uci[1];
+    res[1] = uci[2] + uci[3];
+    res[2] = uci[4];
+
+    var fromIndex = this.algebraicToIndex(res[0]);
+    var toIndex = this.algebraicToIndex(res[1]);
+    var piece = b[fromIndex];
+    if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
+      return false;
+    }
+    if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
+      return false;
+    }
+    if(uci[3] < 1 || uci[3] > 8){
+      return false;
+    }
+    if(uci.length > 5){
+      return false;
+    }
+
+    //white pawn check
+    if(piece === 'P'){
+      //e2e3
+      if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
+        valid = true;
+      }
+      //e2e4
+      if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
+        valid = true;
+      }
+      //e4d5
+      if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
+        valid = true;
+      }
+      //e5d6
+      if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+        if(fenInfo.EnPassant === res[1]){
+          valid = true;
+        }
+      }
+      //e7e8 || e7d8
+      if(uci[3] == 8 && valid === true){
+        valid = false;
+        if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+          valid = true;
+        }
+      }
+    }
+    //black pawn check
+    if(piece === 'p'){
+      // d7d6
+      if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
+        valid = true;
+      }
+      //d7d5
+      if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
+        valid = true;
+      }
+      //d5e4
+      if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
+        valid = true;
+      }
+      //d4e3
+      if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+        if(fenInfo.EnPassant === res[1]){
+        valid = true;
+        }
+      }
+      // d2d1 || d2e1
+      if(uci[3] == 1 && valid === true){
+        valid = false;
+        if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+          valid = true;
+        }
+      }
+    }
+    //white knight check all jumps
+    if(piece === 'N'){
+      if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+        valid = true;
+      }
+      if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+        valid = true;
+      }
+      if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+        valid = true;
+      }
+      if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+        valid = true;
+      }
+    }
+    //black knight check all jumps
+    if(piece === 'n'){
+      if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+        valid = true;
+      }
+      if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+        valid = true;
+      }
+      if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+        valid = true;
+      }
+      if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+        valid = true;
+      }
+    }
+    //white king check
+    if(piece === 'K'){
+      if(((toIndex === 58 && fenInfo.CastlingWq) || (toIndex === 62 && fenInfo.CastlingWk)) && fromIndex === 60){
+        if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+          valid = true;
+        }
+      } else {
+        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
+          valid = true;
+        }
+      }
+    }
+    //black king check
+    if(piece === 'k'){
+      if(((toIndex === 2 && fenInfo.CastlingBq) || (toIndex === 6 && fenInfo.CastlingBk)) && fromIndex === 4){
+        if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+          valid = true;
+        }
+      } else {
+        if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
+          valid = true;
+        }
+      }
+    }
+    //white queen check
+    if(piece === 'Q' || piece === 'R' || piece === 'B'){
+      if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
+        valid = true;
+      }
+    }
+    //black queen check
+    if(piece === 'q' || piece === 'r' || piece === 'b'){
+      if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
+        valid = true;
+      }
+    }
+
+    return valid;
+  },
+
+  makeMove(mv, fenInfo, b, setFen){
+    var fen = fenInfo.Fen;
+
+    if(mv){
+      var uci = mv.split('');
+      var res = [];
+
+      res[0] = uci[0] + uci[1];
+      res[1] = uci[2] + uci[3];
+      res[2] = uci[4];
+
+      if(fen){
+        //fen--->b
+        var info = fen;
+        fen = fen.replace(/ .+$/,'');
+        fen = fen.replace(/\//g,'');
+        info = info.replace(/^.+? /,'');
+        var extra = info.split(" ");
+        if(extra[0].toLowerCase() === 'w'){
+          extra[0] = 'b';
+        } else{
+          extra[0] = 'w';
+        }
+
+        console.log(b);
+        var fromIndex = this.algebraicToIndex(res[0]);
+        var toIndex = this.algebraicToIndex(res[1]);
+        var piece = b[fromIndex];
+        b[fromIndex] = 1;
+        b[toIndex] = piece;
+
+        //CastlingWhite
+        if(piece === 'K'){
+          //NoCastling
+          extra[1] = extra[1].replace(/K/,'');
+          extra[1] = extra[1].replace(/Q/,'');
+          //Castle
+          if(toIndex === 62){
+              b[63] = 1;
+              b[61] = 'R';
+          }
+          if(toIndex === 58){
+            b[56] = 1;
+            b[59] = 'R';
+          }
+        }
+
+        //CastlingBlack
+        if(piece === 'k'){
+          //NoCastling
+          extra[1] = extra[1].replace(/k/,'');
+          extra[1] = extra[1].replace(/q/,'');
+          //Castle
+          if(toIndex === 2){
+              b[0] = 1;
+              b[3] = 'r';
+          }
+          if(toIndex === 6){
+            b[7] = 1;
+            b[5] = 'r';
+          }
+        }
+
+        //RookMoveNoCastlingWhite
+        if(piece === 'R'){
+          if(fromIndex === 56){
+            extra[1] = extra[1].replace(/Q/,'');
+
+          }
+          if(fromIndex === 63){
+            extra[1] = extra[1].replace(/K/,'');
+
+          }
+        }
+
+        //RookMoveNoCastlingBlack
+        if(piece === 'r'){
+          if(fromIndex === 0){
+            extra[1] = extra[1].replace(/q/,'');
+
+          }
+          if(fromIndex === 7){
+            extra[1] = extra[1].replace(/k/,'');
+
+          }
+        }
+        extra[2] = '-';
+
+
+        if(piece === 'P'){
+          if(toIndex < 8){
+            b[toIndex] = res[2].toUpperCase();
+          }
+          if(fromIndex-toIndex === 16){
+            extra[2] = this.indexToAlgebraic(fromIndex - 8);
+          }
+        }
+
+        if(piece === 'p'){
+          if(toIndex > 55){
+            b[toIndex] = res[2].toLowerCase();
+          }
+          if(toIndex-fromIndex === 16){
+            extra[2] = this.indexToAlgebraic(fromIndex + 8);
+          }
+        }
+
+        if(!extra[1]){
+          extra[1] = '-';
+        }
+
+        //b--->fen
+        var newfen = '';
+        var loopCount = 0;
+        for(var i = 0; i < 8; i++){
+          var tempNumber = 0;
+          for(var p = 0; p < 8; p++){
+            var x = b[loopCount];
+            loopCount++;
+            if(isNaN(x)){
+              if(tempNumber){
+                newfen = newfen + tempNumber;
+              }
+              newfen = newfen + x;
+              tempNumber = 0;
+            } else  {
+              tempNumber++;
+            }
+          }
+          if(tempNumber){
+            newfen = newfen + tempNumber;
+          }
+          if(i < 7){
+            newfen = newfen + '/';
+          }
+        }
+        newfen = newfen + ' '+ extra.join(' ');
+        if (setFen) {
+          set(this, 'fen', newfen);
+        }
+      }
+    }
+    return b;
+  },
   lineCheck(fromIndex, toIndex, b, piece){
     var valid = true;
     var fromX = fromIndex % 8;
@@ -358,146 +521,10 @@ export default Controller.extend({
   actions: {
     playMove() {
       var mv = get(this,'move');
-      var fen = get(this,'fen').toString();
-      if(mv){
-        var uci = mv.split('');
-        var res = [];
-
-        res[0] = uci[0] + uci[1];
-        res[1] = uci[2] + uci[3];
-        res[2] = uci[4];
-
-        if(fen){
-          //fen--->b
-          var b = get(this,'boardArray');
-          var info = fen;
-          fen = fen.replace(/ .+$/,'');
-          fen = fen.replace(/\//g,'');
-          info = info.replace(/^.+? /,'');
-          var extra = info.split(" ");
-          if(extra[0].toLowerCase() === 'w'){
-            extra[0] = 'b';
-          } else{
-            extra[0] = 'w';
-          }
-
-          console.log(b);
-          var fromIndex = this.algebraicToIndex(res[0]);
-          var toIndex = this.algebraicToIndex(res[1]);
-          var piece = b[fromIndex];
-          b[fromIndex] = 1;
-          b[toIndex] = piece;
-
-          //CastlingWhite
-          if(piece === 'K'){
-            //NoCastling
-            extra[1] = extra[1].replace(/K/,'');
-            extra[1] = extra[1].replace(/Q/,'');
-            //Castle
-            if(toIndex === 62){
-                b[63] = 1;
-                b[61] = 'R';
-            }
-            if(toIndex === 58){
-              b[56] = 1;
-              b[59] = 'R';
-            }
-          }
-
-          //CastlingBlack
-          if(piece === 'k'){
-            //NoCastling
-            extra[1] = extra[1].replace(/k/,'');
-            extra[1] = extra[1].replace(/q/,'');
-            //Castle
-            if(toIndex === 2){
-                b[0] = 1;
-                b[3] = 'r';
-            }
-            if(toIndex === 6){
-              b[7] = 1;
-              b[5] = 'r';
-            }
-          }
-
-          //RookMoveNoCastlingWhite
-          if(piece === 'R'){
-            if(fromIndex === 56){
-              extra[1] = extra[1].replace(/Q/,'');
-
-            }
-            if(fromIndex === 63){
-              extra[1] = extra[1].replace(/K/,'');
-
-            }
-          }
-
-          //RookMoveNoCastlingBlack
-          if(piece === 'r'){
-            if(fromIndex === 0){
-              extra[1] = extra[1].replace(/q/,'');
-
-            }
-            if(fromIndex === 7){
-              extra[1] = extra[1].replace(/k/,'');
-
-            }
-          }
-          extra[2] = '-';
-
-
-          if(piece === 'P'){
-            if(toIndex < 8){
-              b[toIndex] = res[2].toUpperCase();
-            }
-            if(fromIndex-toIndex === 16){
-              extra[2] = this.indexToAlgebraic(fromIndex - 8);
-            }
-          }
-
-          if(piece === 'p'){
-            if(toIndex > 55){
-              b[toIndex] = res[2].toLowerCase();
-            }
-            if(toIndex-fromIndex === 16){
-              extra[2] = this.indexToAlgebraic(fromIndex + 8);
-            }
-          }
-
-          if(!extra[1]){
-            extra[1] = '-';
-          }
-
-          //b--->fen
-          var newfen = '';
-          var loopCount = 0;
-          for(var i = 0; i < 8; i++){
-            var tempNumber = 0;
-            for(var p = 0; p < 8; p++){
-              var x = b[loopCount];
-              loopCount++;
-              if(isNaN(x)){
-                if(tempNumber){
-                  newfen = newfen + tempNumber;
-                }
-                newfen = newfen + x;
-                tempNumber = 0;
-              } else  {
-                tempNumber++;
-              }
-            }
-            if(tempNumber){
-              newfen = newfen + tempNumber;
-            }
-            if(i < 7){
-              newfen = newfen + '/';
-            }
-          }
-          newfen = newfen + ' '+ extra.join(' ');
-          set(this, "fen", newfen);
-
-        }
-      }
+      var fenInfo = get(this,'fenInfo');
+      var b = get(this,'boardArray');
+      var setFen = true;
+      this.makeMove(mv, fenInfo, b, setFen);
     }
   }
 });
