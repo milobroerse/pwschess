@@ -354,6 +354,9 @@ export default Controller.extend({
           if(fromIndex-toIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex - 8);
           }
+          if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
+            b[toIndex + 8] = 1;
+          }
         }
 
         if(piece === 'p'){
@@ -362,6 +365,9 @@ export default Controller.extend({
           }
           if(toIndex-fromIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex + 8);
+          }
+          if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
+            b[toIndex - 8] = 1;
           }
         }
 
@@ -504,11 +510,15 @@ export default Controller.extend({
 
   algebraicToIndex(alg){
     var piece = alg.split("");
-    var x = this.uciToNumber(piece[0]);
-    var y = piece[1];
-    var index = (8-y)*8+x-1;
+    if (piece.length === 2){
+      var x = this.uciToNumber(piece[0]);
+      var y = piece[1];
+      var index = (8-y)*8+x-1;
 
-    return(index);
+      return(index);
+    } else{
+      return -1;
+    }
   },
 
   indexToAlgebraic(index){
