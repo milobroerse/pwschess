@@ -118,6 +118,7 @@ export default Controller.extend({
 
     var fromIndex = this.algebraicToIndex(res[0]);
     var toIndex = this.algebraicToIndex(res[1]);
+    var piecePromotion = res[2];
     var piece = b[fromIndex];
     if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
       return false;
@@ -155,7 +156,7 @@ export default Controller.extend({
       //e7e8 || e7d8
       if(uci[3] == 8 && valid === true){
         valid = false;
-        if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+        if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
           valid = true;
         }
       }
@@ -183,7 +184,7 @@ export default Controller.extend({
       // d2d1 || d2e1
       if(uci[3] == 1 && valid === true){
         valid = false;
-        if(res[2] === 'n' || res[2] === 'b'|| res[2] === 'r'|| res[2] === 'q'){
+        if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
           valid = true;
         }
       }
