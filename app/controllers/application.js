@@ -285,6 +285,7 @@ export default Controller.extend({
         console.log(b);
         var fromIndex = this.algebraicToIndex(res[0]);
         var toIndex = this.algebraicToIndex(res[1]);
+        var piecePromotion = res[2];
         var piece = b[fromIndex];
         b[fromIndex] = 1;
         b[toIndex] = piece;
@@ -349,7 +350,7 @@ export default Controller.extend({
 
         if(piece === 'P'){
           if(toIndex < 8){
-            b[toIndex] = res[2].toUpperCase();
+            b[toIndex] = piecePromotion.toUpperCase();
           }
           if(fromIndex-toIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex - 8);
@@ -361,7 +362,7 @@ export default Controller.extend({
 
         if(piece === 'p'){
           if(toIndex > 55){
-            b[toIndex] = res[2].toLowerCase();
+            b[toIndex] =  piecePromotion.toLowerCase();
           }
           if(toIndex-fromIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex + 8);
