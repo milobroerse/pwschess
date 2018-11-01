@@ -55,32 +55,19 @@ export default Controller.extend({
   }),
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
-    var moveObject = get(this, 'fenInfo');
-    console.log(moveObject);
-    var mv = get(this,'move');
     var valid = false;
-    if(mv && mv.length > 3 && mv.length < 6){
 
-      var uci = mv.split('');
-      var res = [];
-      res[0] = uci[0] + uci[1];
-      res[1] = uci[2] + uci[3];
-      res[2] = uci[4];
-
-      moveObject.fromIndex = this.algebraicToIndex(res[0]);
-      moveObject.toIndex = this.algebraicToIndex(res[1]);
-      if(res[2]){
-        moveObject.piecePromotion = res[2].toLowerCase();
-      }
-      moveObject.b = get(this,'boardArray').toArray();
-      var newMoveObject = this.checkValid(moveObject);
-      if(newMoveObject.valid){
-    //    var setFen = false;
-      //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
-        valid = true;
-      } else{
-        valid = false;
-      }
+    var mv = get(this,'move');
+    var fenInfo = get(this,'fenInfo');
+    var b =  get(this,'boardArray').toArray();
+    var moveObject = this.mvToMoveObject(fenInfo, mv, b);
+    var newMoveObject = this.checkValid(moveObject);
+    if(newMoveObject.valid){
+  //    var setFen = false;
+    //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
+      valid = true;
+    } else{
+      valid = false;
     }
     return valid;
   }),
@@ -117,150 +104,152 @@ export default Controller.extend({
 
   checkValid(moveObject){
     var valid = false;
+    if(moveObject.valid) {
 
-    var fromIndex = moveObject.fromIndex;
-    var toIndex = moveObject.toIndex;
-    var piecePromotion = moveObject.piecePromotion;
-    var b = moveObject.b;
+      var fromIndex = moveObject.fromIndex;
+      var toIndex = moveObject.toIndex;
+      var piecePromotion = moveObject.piecePromotion;
+      var b = moveObject.b;
 
-    var uci = [];
+      var uci = [];
 
-    uci[0] = (fromIndex % 8) + 1;
-    uci[1] = 8 - (Math.floor(fromIndex / 8));
-    uci[2] = (toIndex % 8) + 1;
-    uci[3] = 8 - (Math.floor(toIndex / 8));
+      uci[0] = (fromIndex % 8) + 1;
+      uci[1] = 8 - (Math.floor(fromIndex / 8));
+      uci[2] = (toIndex % 8) + 1;
+      uci[3] = 8 - (Math.floor(toIndex / 8));
 
-    var piece = b[fromIndex];
-    if(moveObject.ToMove === 'w' && this.isBlack(b[fromIndex])){
-      return false;
-    }
-    if(moveObject.ToMove === 'b' && this.isWhite(b[fromIndex])){
-      return false;
-    }
-    if(uci[3] < 1 || uci[3] > 8){
-      return false;
-    }
-
-    // WhitePawnCheck
-    if(piece === 'P'){
-      //e2e3
-      if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
-        valid = true;
+      var piece = b[fromIndex];
+      if(moveObject.ToMove === 'w' && this.isBlack(b[fromIndex])){
+        return false;
       }
-      //e2e4
-      if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
-        valid = true;
+      if(moveObject.ToMove === 'b' && this.isWhite(b[fromIndex])){
+        return false;
       }
-      //e4d5
-      if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
-        valid = true;
+      if(uci[3] < 1 || uci[3] > 8){
+        return false;
       }
-      //e5d6
-      if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-        if(moveObject.EnPassant === toIndex){
+
+      // WhitePawnCheck
+      if(piece === 'P'){
+        //e2e3
+        if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
+          valid = true;
+        }
+        //e2e4
+        if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex-8])){
+          valid = true;
+        }
+        //e4d5
+        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
+          valid = true;
+        }
+        //e5d6
+        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+          if(moveObject.EnPassant === toIndex){
+            valid = true;
+          }
+        }
+        //e7e8 || e7d8
+        if(uci[3] == 8 && valid === true){
+          valid = false;
+          if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
+            valid = true;
+          }
+        }
+      }
+      // BlackPawnCheck
+      if(piece === 'p'){
+        // d7d6
+        if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
+          valid = true;
+        }
+        //d7d5
+        if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
+          valid = true;
+        }
+        //d5e4
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
+          valid = true;
+        }
+        //d4e3
+        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+          if(moveObject.EnPassant === toIndex){
+          valid = true;
+          }
+        }
+        // d2d1 || d2e1
+        if(uci[3] == 1 && valid === true){
+          valid = false;
+          if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
+            valid = true;
+          }
+        }
+      }
+      //white knight check all jumps
+      if(piece === 'N'){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
         }
       }
-      //e7e8 || e7d8
-      if(uci[3] == 8 && valid === true){
-        valid = false;
-        if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
+      //black knight check all jumps
+      if(piece === 'n'){
+        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+          valid = true;
+        }
+        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+          valid = true;
+        }
+        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
         }
       }
-    }
-    // BlackPawnCheck
-    if(piece === 'p'){
-      // d7d6
-      if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
-        valid = true;
-      }
-      //d7d5
-      if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex+8])){
-        valid = true;
-      }
-      //d5e4
-      if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
-        valid = true;
-      }
-      //d4e3
-      if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-        if(moveObject.EnPassant === toIndex){
-        valid = true;
+      //white king check
+      if(piece === 'K'){
+        if(((toIndex === 58 && moveObject.CastlingWq) || (toIndex === 62 && moveObject.CastlingWk)) && fromIndex === 60){
+          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+            valid = true;
+          }
+        } else {
+          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
+            valid = true;
+          }
         }
       }
-      // d2d1 || d2e1
-      if(uci[3] == 1 && valid === true){
-        valid = false;
-        if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
-          valid = true;
+      //black king check
+      if(piece === 'k'){
+        if(((toIndex === 2 && moveObject.CastlingBq) || (toIndex === 6 && moveObject.CastlingBk)) && fromIndex === 4){
+          if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
+            valid = true;
+          }
+        } else {
+          if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
+            valid = true;
+          }
         }
       }
-    }
-    //white knight check all jumps
-    if(piece === 'N'){
-      if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
-        valid = true;
-      }
-      if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
-        valid = true;
-      }
-      if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-        valid = true;
-      }
-      if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-        valid = true;
-      }
-    }
-    //black knight check all jumps
-    if(piece === 'n'){
-      if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
-        valid = true;
-      }
-      if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
-        valid = true;
-      }
-      if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-        valid = true;
-      }
-      if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-        valid = true;
-      }
-    }
-    //white king check
-    if(piece === 'K'){
-      if(((toIndex === 58 && moveObject.CastlingWq) || (toIndex === 62 && moveObject.CastlingWk)) && fromIndex === 60){
-        if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
-      } else {
+      //white queen check
+      if(piece === 'Q' || piece === 'R' || piece === 'B'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
           valid = true;
         }
       }
-    }
-    //black king check
-    if(piece === 'k'){
-      if(((toIndex === 2 && moveObject.CastlingBq) || (toIndex === 6 && moveObject.CastlingBk)) && fromIndex === 4){
-        if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
-      } else {
+      //black queen check
+      if(piece === 'q' || piece === 'r' || piece === 'b'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
           valid = true;
         }
-      }
-    }
-    //white queen check
-    if(piece === 'Q' || piece === 'R' || piece === 'B'){
-      if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-        valid = true;
-      }
-    }
-    //black queen check
-    if(piece === 'q' || piece === 'r' || piece === 'b'){
-      if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-        valid = true;
       }
     }
     moveObject.valid = valid;
@@ -540,28 +529,38 @@ export default Controller.extend({
     return(x+y);
   },
 
+  mvToMoveObject(fenInfo, mv, b){
+    var moveObject = fenInfo;
+    var valid = false;
+    if(mv && mv.length > 3 && mv.length < 6){
+      valid = true;
+      var uci = mv.split('');
+      var res = [];
+
+      res[0] = uci[0] + uci[1];
+      res[1] = uci[2] + uci[3];
+      res[2] = uci[4];
+
+      moveObject.fromIndex = this.algebraicToIndex(res[0]);
+      moveObject.toIndex = this.algebraicToIndex(res[1]);
+      if(res[2]){
+        moveObject.piecePromotion = res[2].toLowerCase();
+      }
+      moveObject.b = b;
+    }
+    moveObject.valid = valid;
+    return moveObject;
+  },
+
   actions: {
     playMove() {
       var mv = get(this,'move');
-      if(mv && mv.length > 3 && mv.length < 6){
-        var moveObject = get(this,'fenInfo');
-        var uci = mv.split('');
-        var res = [];
+      var fenInfo = get(this,'fenInfo');
+      var b =  get(this,'boardArray').toArray();
+      var moveObject = this.mvToMoveObject(fenInfo, mv, b);
+      var newMoveObject = this.makeMove(moveObject);
 
-        res[0] = uci[0] + uci[1];
-        res[1] = uci[2] + uci[3];
-        res[2] = uci[4];
-
-        moveObject.fromIndex = this.algebraicToIndex(res[0]);
-        moveObject.toIndex = this.algebraicToIndex(res[1]);
-        if(res[2]){
-          moveObject.piecePromotion = res[2].toLowerCase();
-        }
-        moveObject.b = get(this,'boardArray').toArray();
-        var newMoveObject = this.makeMove(moveObject);
-
-        set(this, 'fen' , newMoveObject.Fen);
-      }
+      set(this, 'fen' , newMoveObject.Fen);
     }
   }
 });
