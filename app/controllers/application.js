@@ -44,7 +44,6 @@ export default Controller.extend({
         }
       }
     }
-
     if(index !== 64){
       var k;
       b = [];
@@ -56,15 +55,29 @@ export default Controller.extend({
   }),
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
-    var fenInfo = get(this, 'fenInfo');
-    console.log(fenInfo);
+    var moveObject = get(this, 'fenInfo');
+    console.log(moveObject);
     var mv = get(this,'move');
     var valid = false;
-    if(mv && mv.length > 3){
-      var b = get(this,'boardArray').toArray();
-      if(this.checkValid(mv, fenInfo, b)){
-        var setFen = false;
-        var bNew = this.makeMove(mv, fenInfo, b, setFen);
+    if(mv && mv.length > 3 && mv.length < 6){
+
+      var uci = mv.split('');
+      var res = [];
+      res[0] = uci[0] + uci[1];
+      res[1] = uci[2] + uci[3];
+      res[2] = uci[4];
+
+      moveObject.fromIndex = this.algebraicToIndex(res[0]);
+      moveObject.toIndex = this.algebraicToIndex(res[1]);
+      if(res[2]){
+        moveObject.piecePromotion = res[2].toLowerCase();
+      }
+      moveObject.b = get(this,'boardArray').toArray();
+
+      var newMoveObject = this.checkValid(moveObject);
+      if(newMoveObject.valid){
+    //    var setFen = false;
+      //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
         valid = true;
 
       } else{
@@ -106,34 +119,33 @@ export default Controller.extend({
     return {FenTrue: false};
   }),
 
-  checkValid(mv, fenInfo, b){
+  checkValid(moveObject){
     var valid = false;
-    mv = mv.toLowerCase();
-    var uci = mv.split('');
-    var res = [];
 
-    res[0] = uci[0] + uci[1];
-    res[1] = uci[2] + uci[3];
-    res[2] = uci[4];
+    var fromIndex = moveObject.fromIndex;
+    var toIndex = moveObject.toIndex;
+    var piecePromotion = moveObject.piecePromotion;
+    var b = moveObject.b;
 
-    var fromIndex = this.algebraicToIndex(res[0]);
-    var toIndex = this.algebraicToIndex(res[1]);
-    var piecePromotion = res[2];
+    var uci = [];
+
+    uci[0] = (fromIndex % 8) + 1;
+    uci[1] = 8 - (Math.floor(fromIndex / 8));
+    uci[2] = (toIndex % 8) + 1;
+    uci[3] = 8 - (Math.floor(toIndex / 8));
+
     var piece = b[fromIndex];
-    if(fenInfo.ToMove === 'w' && this.isBlack(b[fromIndex])){
+    if(moveObject.ToMove === 'w' && this.isBlack(b[fromIndex])){
       return false;
     }
-    if(fenInfo.ToMove === 'b' && this.isWhite(b[fromIndex])){
+    if(moveObject.ToMove === 'b' && this.isWhite(b[fromIndex])){
       return false;
     }
     if(uci[3] < 1 || uci[3] > 8){
       return false;
     }
-    if(uci.length > 5){
-      return false;
-    }
 
-    //white pawn check
+    // WhitePawnCheck
     if(piece === 'P'){
       //e2e3
       if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
@@ -149,7 +161,7 @@ export default Controller.extend({
       }
       //e5d6
       if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-        if(fenInfo.EnPassant === res[1]){
+        if(moveObject.EnPassant === toIndex){
           valid = true;
         }
       }
@@ -161,7 +173,7 @@ export default Controller.extend({
         }
       }
     }
-    //black pawn check
+    // BlackPawnCheck
     if(piece === 'p'){
       // d7d6
       if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
@@ -177,7 +189,7 @@ export default Controller.extend({
       }
       //d4e3
       if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-        if(fenInfo.EnPassant === res[1]){
+        if(moveObject.EnPassant === toIndex){
         valid = true;
         }
       }
@@ -221,7 +233,7 @@ export default Controller.extend({
     }
     //white king check
     if(piece === 'K'){
-      if(((toIndex === 58 && fenInfo.CastlingWq) || (toIndex === 62 && fenInfo.CastlingWk)) && fromIndex === 60){
+      if(((toIndex === 58 && moveObject.CastlingWq) || (toIndex === 62 && moveObject.CastlingWk)) && fromIndex === 60){
         if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
           valid = true;
         }
@@ -233,7 +245,7 @@ export default Controller.extend({
     }
     //black king check
     if(piece === 'k'){
-      if(((toIndex === 2 && fenInfo.CastlingBq) || (toIndex === 6 && fenInfo.CastlingBk)) && fromIndex === 4){
+      if(((toIndex === 2 && moveObject.CastlingBq) || (toIndex === 6 && moveObject.CastlingBk)) && fromIndex === 4){
         if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
           valid = true;
         }
@@ -255,8 +267,8 @@ export default Controller.extend({
         valid = true;
       }
     }
-
-    return valid;
+    moveObject.valid = valid;
+    return moveObject
   },
 
   makeMove(mv, fenInfo, b, setFen){
@@ -348,26 +360,33 @@ export default Controller.extend({
         }
         extra[2] = '-';
 
-
+        // WhitePawn
         if(piece === 'P'){
+          // WhitePawnPromotion
           if(toIndex < 8){
             b[toIndex] = piecePromotion.toUpperCase();
           }
+          //WhitePawnLong
           if(fromIndex-toIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex - 8);
           }
+          //WhitePawnEP
           if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
             b[toIndex + 8] = 1;
           }
         }
 
+        // BlackPawn
         if(piece === 'p'){
+          // BlackPawnPromotion
           if(toIndex > 55){
             b[toIndex] =  piecePromotion.toLowerCase();
           }
+          // BlackPawnLong
           if(toIndex-fromIndex === 16){
             extra[2] = this.indexToAlgebraic(fromIndex + 8);
           }
+          // BlackPawnEP
           if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
             b[toIndex - 8] = 1;
           }
@@ -410,6 +429,7 @@ export default Controller.extend({
     }
     return b;
   },
+
   lineCheck(fromIndex, toIndex, b, piece){
     var valid = true;
     var fromX = fromIndex % 8;
@@ -425,9 +445,6 @@ export default Controller.extend({
     var maxXY = Math.max(difX, difY);
     var difMove = toIndex - fromIndex;
     var step = difMove / maxXY;
-
-
-    console.log(toIndex + ' : ' + fromX + ' ' + fromY + ' ' + toX + ' ' + toY + ' ' + difX + ' ' + difY + ' ' + maxXY + ' ' + difMove + ' ' + step);
 
     if(piece === 'Q' || piece === 'q'){
       if(difX !== 0 && difY !== 0 && difX !== difY){
