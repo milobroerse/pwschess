@@ -73,19 +73,15 @@ export default Controller.extend({
         moveObject.piecePromotion = res[2].toLowerCase();
       }
       moveObject.b = get(this,'boardArray').toArray();
-
       var newMoveObject = this.checkValid(moveObject);
       if(newMoveObject.valid){
     //    var setFen = false;
       //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
         valid = true;
-
       } else{
         valid = false;
       }
     }
-
-
     return valid;
   }),
 
@@ -271,163 +267,160 @@ export default Controller.extend({
     return moveObject
   },
 
-  makeMove(mv, fenInfo, b, setFen){
-    var fen = fenInfo.Fen;
+  makeMove(moveObject){
+    var fen = moveObject.Fen;
+    if(fen){
+      //fen--->b
+      var info = fen;
+      fen = fen.replace(/ .+$/,'');
+      fen = fen.replace(/\//g,'');
+      info = info.replace(/^.+? /,'');
+      var extra = info.split(" ");
+      if(extra[0].toLowerCase() === 'w'){
+        extra[0] = 'b';
+      } else{
+        extra[0] = 'w';
+      }
+      var fromIndex = moveObject.fromIndex;
+      var toIndex = moveObject.toIndex;
+      var piecePromotion = moveObject.piecePromotion;
+      var b = moveObject.b;
 
-    if(mv){
-      var uci = mv.split('');
-      var res = [];
+      var uci = [];
+      uci[0] = (fromIndex % 8) + 1;
+      uci[1] = 8 - (Math.floor(fromIndex / 8));
+      uci[2] = (toIndex % 8) + 1;
+      uci[3] = 8 - (Math.floor(toIndex / 8));
 
-      res[0] = uci[0] + uci[1];
-      res[1] = uci[2] + uci[3];
-      res[2] = uci[4];
+      console.log(b);
 
-      if(fen){
-        //fen--->b
-        var info = fen;
-        fen = fen.replace(/ .+$/,'');
-        fen = fen.replace(/\//g,'');
-        info = info.replace(/^.+? /,'');
-        var extra = info.split(" ");
-        if(extra[0].toLowerCase() === 'w'){
-          extra[0] = 'b';
-        } else{
-          extra[0] = 'w';
+      var piece = b[fromIndex];
+      b[fromIndex] = 1;
+      b[toIndex] = piece;
+
+      //CastlingWhite
+      if(piece === 'K'){
+        //NoCastling
+        extra[1] = extra[1].replace(/K/,'');
+        extra[1] = extra[1].replace(/Q/,'');
+        //Castle
+        if(toIndex === 62){
+            b[63] = 1;
+            b[61] = 'R';
         }
-
-        console.log(b);
-        var fromIndex = this.algebraicToIndex(res[0]);
-        var toIndex = this.algebraicToIndex(res[1]);
-        var piecePromotion = res[2];
-        var piece = b[fromIndex];
-        b[fromIndex] = 1;
-        b[toIndex] = piece;
-
-        //CastlingWhite
-        if(piece === 'K'){
-          //NoCastling
-          extra[1] = extra[1].replace(/K/,'');
-          extra[1] = extra[1].replace(/Q/,'');
-          //Castle
-          if(toIndex === 62){
-              b[63] = 1;
-              b[61] = 'R';
-          }
-          if(toIndex === 58){
-            b[56] = 1;
-            b[59] = 'R';
-          }
-        }
-
-        //CastlingBlack
-        if(piece === 'k'){
-          //NoCastling
-          extra[1] = extra[1].replace(/k/,'');
-          extra[1] = extra[1].replace(/q/,'');
-          //Castle
-          if(toIndex === 2){
-              b[0] = 1;
-              b[3] = 'r';
-          }
-          if(toIndex === 6){
-            b[7] = 1;
-            b[5] = 'r';
-          }
-        }
-
-        //RookMoveNoCastlingWhite
-        if(piece === 'R'){
-          if(fromIndex === 56){
-            extra[1] = extra[1].replace(/Q/,'');
-
-          }
-          if(fromIndex === 63){
-            extra[1] = extra[1].replace(/K/,'');
-
-          }
-        }
-
-        //RookMoveNoCastlingBlack
-        if(piece === 'r'){
-          if(fromIndex === 0){
-            extra[1] = extra[1].replace(/q/,'');
-
-          }
-          if(fromIndex === 7){
-            extra[1] = extra[1].replace(/k/,'');
-
-          }
-        }
-        extra[2] = '-';
-
-        // WhitePawn
-        if(piece === 'P'){
-          // WhitePawnPromotion
-          if(toIndex < 8){
-            b[toIndex] = piecePromotion.toUpperCase();
-          }
-          //WhitePawnLong
-          if(fromIndex-toIndex === 16){
-            extra[2] = this.indexToAlgebraic(fromIndex - 8);
-          }
-          //WhitePawnEP
-          if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
-            b[toIndex + 8] = 1;
-          }
-        }
-
-        // BlackPawn
-        if(piece === 'p'){
-          // BlackPawnPromotion
-          if(toIndex > 55){
-            b[toIndex] =  piecePromotion.toLowerCase();
-          }
-          // BlackPawnLong
-          if(toIndex-fromIndex === 16){
-            extra[2] = this.indexToAlgebraic(fromIndex + 8);
-          }
-          // BlackPawnEP
-          if(this.algebraicToIndex(fenInfo.EnPassant) === toIndex){
-            b[toIndex - 8] = 1;
-          }
-        }
-
-        if(!extra[1]){
-          extra[1] = '-';
-        }
-
-        //b--->fen
-        var newfen = '';
-        var loopCount = 0;
-        for(var i = 0; i < 8; i++){
-          var tempNumber = 0;
-          for(var p = 0; p < 8; p++){
-            var x = b[loopCount];
-            loopCount++;
-            if(isNaN(x)){
-              if(tempNumber){
-                newfen = newfen + tempNumber;
-              }
-              newfen = newfen + x;
-              tempNumber = 0;
-            } else  {
-              tempNumber++;
-            }
-          }
-          if(tempNumber){
-            newfen = newfen + tempNumber;
-          }
-          if(i < 7){
-            newfen = newfen + '/';
-          }
-        }
-        newfen = newfen + ' '+ extra.join(' ');
-        if (setFen) {
-          set(this, 'fen', newfen);
+        if(toIndex === 58){
+          b[56] = 1;
+          b[59] = 'R';
         }
       }
+
+      //CastlingBlack
+      if(piece === 'k'){
+        //NoCastling
+        extra[1] = extra[1].replace(/k/,'');
+        extra[1] = extra[1].replace(/q/,'');
+        //Castle
+        if(toIndex === 2){
+            b[0] = 1;
+            b[3] = 'r';
+        }
+        if(toIndex === 6){
+          b[7] = 1;
+          b[5] = 'r';
+        }
+      }
+
+      //RookMoveNoCastlingWhite
+      if(piece === 'R'){
+        if(fromIndex === 56){
+          extra[1] = extra[1].replace(/Q/,'');
+
+        }
+        if(fromIndex === 63){
+          extra[1] = extra[1].replace(/K/,'');
+
+        }
+      }
+
+      //RookMoveNoCastlingBlack
+      if(piece === 'r'){
+        if(fromIndex === 0){
+          extra[1] = extra[1].replace(/q/,'');
+
+        }
+        if(fromIndex === 7){
+          extra[1] = extra[1].replace(/k/,'');
+
+        }
+      }
+      extra[2] = '-';
+
+      // WhitePawn
+      if(piece === 'P'){
+        // WhitePawnPromotion
+        if(toIndex < 8){
+          b[toIndex] = piecePromotion.toUpperCase();
+        }
+        //WhitePawnLong
+        if(fromIndex-toIndex === 16){
+          extra[2] = this.indexToAlgebraic(fromIndex - 8);
+        }
+        //WhitePawnEP
+        if(this.algebraicToIndex(moveObject.EnPassant) === toIndex){
+          b[toIndex + 8] = 1;
+        }
+      }
+
+      // BlackPawn
+      if(piece === 'p'){
+        // BlackPawnPromotion
+        if(toIndex > 55){
+          b[toIndex] =  piecePromotion.toLowerCase();
+        }
+        // BlackPawnLong
+        if(toIndex-fromIndex === 16){
+          extra[2] = this.indexToAlgebraic(fromIndex + 8);
+        }
+        // BlackPawnEP
+        if(this.algebraicToIndex(moveObject.EnPassant) === toIndex){
+          b[toIndex - 8] = 1;
+        }
+      }
+
+      if(!extra[1]){
+        extra[1] = '-';
+      }
+
+      //b--->fen
+      var newfen = '';
+      var loopCount = 0;
+      for(var i = 0; i < 8; i++){
+        var tempNumber = 0;
+        for(var p = 0; p < 8; p++){
+          var x = b[loopCount];
+          loopCount++;
+          if(isNaN(x)){
+            if(tempNumber){
+              newfen = newfen + tempNumber;
+            }
+            newfen = newfen + x;
+            tempNumber = 0;
+          } else  {
+            tempNumber++;
+          }
+        }
+        if(tempNumber){
+          newfen = newfen + tempNumber;
+        }
+        if(i < 7){
+          newfen = newfen + '/';
+        }
+      }
+      newfen = newfen + ' '+ extra.join(' ');
     }
-    return b;
+    moveObject.b = b;
+    moveObject.Fen = newfen;
+    return moveObject;
   },
 
   lineCheck(fromIndex, toIndex, b, piece){
@@ -550,10 +543,25 @@ export default Controller.extend({
   actions: {
     playMove() {
       var mv = get(this,'move');
-      var fenInfo = get(this,'fenInfo');
-      var b = get(this,'boardArray');
-      var setFen = true;
-      this.makeMove(mv, fenInfo, b, setFen);
+      if(mv && mv.length > 3 && mv.length < 6){
+        var moveObject = get(this,'fenInfo');
+        var uci = mv.split('');
+        var res = [];
+
+        res[0] = uci[0] + uci[1];
+        res[1] = uci[2] + uci[3];
+        res[2] = uci[4];
+
+        moveObject.fromIndex = this.algebraicToIndex(res[0]);
+        moveObject.toIndex = this.algebraicToIndex(res[1]);
+        if(res[2]){
+          moveObject.piecePromotion = res[2].toLowerCase();
+        }
+        moveObject.b = get(this,'boardArray').toArray();
+        var newMoveObject = this.makeMove(moveObject);
+
+        set(this, 'fen' , newMoveObject.Fen);
+      }
     }
   }
 });
