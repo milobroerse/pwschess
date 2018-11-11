@@ -56,15 +56,30 @@ export default Controller.extend({
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
     var valid = false;
-
+    console.log('milo');
     var mv = get(this,'move');
     var fenInfo = get(this,'fenInfo');
     var b =  get(this,'boardArray').toArray();
     var moveObject = this.mvToMoveObject(fenInfo, mv, b);
     var newMoveObject = this.checkValid(moveObject);
     if(newMoveObject.valid){
-  //    var setFen = false;
-    //  var bNew = this.makeMove(mv, fenInfo, b, setFen);
+      var afterMoveObject = this.makeMove(moveObject);
+      for(var i = 0;  i < afterMoveObject.b.length; i++){
+        if(afterMoveObject.b[i] === 'K'){
+          afterMoveObject.toIndex = i;
+          console.log(i);
+        }
+      }
+      for(var j = 0;  j < afterMoveObject.b.length; j++){
+        if(afterMoveObject.b[j] === 'q'){
+          afterMoveObject.fromIndex = j;
+        //  var fromNewMoveObject = this.checkValid(afterMoveObject);
+          console.log(j);
+          console.log(afterMoveObject);
+        }
+      }
+
+
       valid = true;
     } else{
       valid = false;
@@ -120,13 +135,16 @@ export default Controller.extend({
 
       var piece = b[fromIndex];
       if(moveObject.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        return false;
+        moveObject.valid = false;
+        return moveObject
       }
       if(moveObject.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        return false;
+        moveObject.valid = false;
+        return moveObject
       }
       if(uci[3] < 1 || uci[3] > 8){
-        return false;
+        moveObject.valid = false;
+        return moveObject
       }
 
       // WhitePawnCheck
@@ -281,7 +299,7 @@ export default Controller.extend({
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
 
-      console.log(b);
+
 
       var piece = b[fromIndex];
       b[fromIndex] = 1;
@@ -484,7 +502,7 @@ export default Controller.extend({
   },
 
   isWhite(piece){
-    if(piece === 'P' ||piece === 'N' ||piece === 'B'||piece === 'R'||piece === 'Q'||piece === 'K'){
+    if(piece === 'P' || piece === 'N' || piece === 'B'|| piece === 'R'|| piece === 'Q'|| piece === 'K'){
       return true;
     } else{
       return false;
