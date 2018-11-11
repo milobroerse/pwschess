@@ -1,0 +1,27 @@
+<div class="row">
+
+<div class = "column1">
+{{input type="text" value=fen placeholder="Vul hier een FEN in" size=60}}
+
+{{input class = (unless validMove 'valid') type="text" value=move placeholder="" size=30}}
+<button {{action "playMove"}}>Move</button>
+</div>
+
+<div class="board column2" >
+  {{#each tiles as |tile|}}
+       <div class={{tile}}></div>
+   {{/each}}
+</div>
+<div class = "column3">
+{{#if fenInfo.FenTrue}}
+<b>To Move :</b> {{fenInfo.ToMove}}<br/>
+<h4>Castling Availabilty</h4>
+<b>White Long: </b>{{#if fenInfo.CastlingWq}}True{{else}}False{{/if}}<br/>
+<b>White Short: </b>{{#if fenInfo.CastlingWk}}True{{else}}False{{/if}}<br/>
+<b>Black Long: </b>{{#if fenInfo.CastlingBq}}True{{else}}False{{/if}}<br/>
+<b>Black Short: </b>{{#if fenInfo.CastlingBk}}True{{else}}False{{/if}}<br/>
+<b>En passant target: </b>{{fenInfo.EnPassant}}
+{{/if}}
+</div>
+{{outlet}}
+</div>
