@@ -1,11 +1,6 @@
 .valid{
      background-color: red;
-
 }
-
-
-
-
 
 .row {
     display: flex;
@@ -22,16 +17,16 @@
 
 .board{
     border: 10px solid gray;
-    height: 800px;
+    height: 400px;
     margin-left: auto;
     margin-right: auto;
-    width: 800px;
+    width: 400px;
 }
 .tile{
     background-size: contain;
     float: left;
-    height: 100px;
-    width: 100px;
+    height: 50px;
+    width: 50px;
 }
 
 .black{
