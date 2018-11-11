@@ -56,31 +56,32 @@ export default Controller.extend({
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
     var valid = false;
-    console.log('milo');
+    console.log('valid move check');
     var mv = get(this,'move');
-    var fenInfo = get(this,'fenInfo');
+    var fi = get(this,'fenInfo');
+    console.log(fi);
     var b =  get(this,'boardArray').toArray();
-    var moveObject = this.mvToMoveObject(fenInfo, mv, b);
+    var moveObject = this.mvToMoveObject(fi, mv, b);
     var newMoveObject = this.checkValid(moveObject);
+
     if(newMoveObject.valid){
+      valid = true;
       var afterMoveObject = this.makeMove(moveObject);
+  //    var martin = this.makeMove(moveObject);
       for(var i = 0;  i < afterMoveObject.b.length; i++){
         if(afterMoveObject.b[i] === 'K'){
           afterMoveObject.toIndex = i;
-          console.log(i);
+          // console.log(i);
         }
       }
       for(var j = 0;  j < afterMoveObject.b.length; j++){
         if(afterMoveObject.b[j] === 'q'){
           afterMoveObject.fromIndex = j;
         //  var fromNewMoveObject = this.checkValid(afterMoveObject);
-          console.log(j);
-          console.log(afterMoveObject);
+          // console.log(j);
+          // console.log(afterMoveObject);
         }
       }
-
-
-      valid = true;
     } else{
       valid = false;
     }
@@ -102,6 +103,7 @@ export default Controller.extend({
   }),
 
   fenInfo: computed('fen', function() {
+    console.log('fenInfo');
     var fen = get(this,'fen').toString();
     if(fen){
       var orgFen = fen;
@@ -111,7 +113,7 @@ export default Controller.extend({
       if(res.length == 5){
         var EnPassant = res[2];
         EnPassant = EnPassant.replace(/-/g,'');
-        return {FenTrue: true, Fen: orgFen, ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant}
+        return {FenTrue: true, Fen: orgFen, ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant};
       }
     }
     return {FenTrue: false};
@@ -276,6 +278,7 @@ export default Controller.extend({
 
   makeMove(moveObject){
     var fen = moveObject.Fen;
+    var mo = moveObject;
     if(fen){
       //fen--->b
       var info = fen;
@@ -423,11 +426,11 @@ export default Controller.extend({
           newfen = newfen + '/';
         }
       }
-      newfen = newfen + ' '+ extra.join(' ');
+      newfen = newfen + ' ' + extra.join(' ');
     }
-    moveObject.b = b;
-    moveObject.Fen = newfen;
-    return moveObject;
+    mo.b = b;
+    mo.Fen = newfen;
+    return mo;
   },
 
   lineCheck(fromIndex, toIndex, b, piece){
@@ -577,7 +580,7 @@ export default Controller.extend({
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fenInfo, mv, b);
       var newMoveObject = this.makeMove(moveObject);
-
+      console.log(newMoveObject.Fen);
       set(this, 'fen' , newMoveObject.Fen);
     }
   }
