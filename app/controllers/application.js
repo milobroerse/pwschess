@@ -58,7 +58,7 @@ export default Controller.extend({
     var valid = false;
     console.log('valid move check');
     var mv = get(this,'move');
-    var fi = get(this,'fenInfo');
+    var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
     console.log(fi);
     var b =  get(this,'boardArray').toArray();
     var moveObject = this.mvToMoveObject(fi, mv, b);
@@ -66,6 +66,7 @@ export default Controller.extend({
 
     if(newMoveObject.valid){
       valid = true;
+
       var afterMoveObject = this.makeMove(moveObject);
   //    var martin = this.makeMove(moveObject);
       for(var i = 0;  i < afterMoveObject.b.length; i++){
@@ -121,12 +122,14 @@ export default Controller.extend({
 
   checkValid(moveObject){
     var valid = false;
-    if(moveObject.valid) {
+    var mo = Object.assign(moveObject);
 
-      var fromIndex = moveObject.fromIndex;
-      var toIndex = moveObject.toIndex;
-      var piecePromotion = moveObject.piecePromotion;
-      var b = moveObject.b;
+    if(mo.valid) {
+
+      var fromIndex = mo.fromIndex;
+      var toIndex = mo.toIndex;
+      var piecePromotion = mo.piecePromotion;
+      var b = mo.b;
 
       var uci = [];
 
@@ -136,17 +139,17 @@ export default Controller.extend({
       uci[3] = 8 - (Math.floor(toIndex / 8));
 
       var piece = b[fromIndex];
-      if(moveObject.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        moveObject.valid = false;
-        return moveObject
+      if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
+        mo.valid = false;
+        return mo
       }
-      if(moveObject.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        moveObject.valid = false;
-        return moveObject
+      if(mo.ToMove === 'b' && this.isWhite(b[fromIndex])){
+        mo.valid = false;
+        return mo
       }
       if(uci[3] < 1 || uci[3] > 8){
-        moveObject.valid = false;
-        return moveObject
+        mo.valid = false;
+        return mo
       }
 
       // WhitePawnCheck
@@ -165,14 +168,14 @@ export default Controller.extend({
         }
         //e5d6
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          if(moveObject.EnPassant === toIndex){
+          if(mo.EnPassant === toIndex){
             valid = true;
           }
         }
         //e7e8 || e7d8
         if(uci[3] == 8 && valid === true){
           valid = false;
-          if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
+          if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
             valid = true;
           }
         }
@@ -188,56 +191,56 @@ export default Controller.extend({
           valid = true;
         }
         //d5e4
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3]-uci[1] === -1) {
           valid = true;
         }
         //d4e3
-        if((toIndex - fromIndex === 9  || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          if(moveObject.EnPassant === toIndex){
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+          if(mo.EnPassant === toIndex){
           valid = true;
           }
         }
         // d2d1 || d2e1
         if(uci[3] == 1 && valid === true){
           valid = false;
-          if(piecePromotion === 'n' || piecePromotion === 'b'|| piecePromotion === 'r'|| piecePromotion === 'q'){
+          if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
             valid = true;
           }
         }
       }
       //white knight check all jumps
       if(piece === 'N'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+        if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
         }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+        if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
           valid = true;
         }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+        if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
         }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+        if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10)  && this.isBlackOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
         }
       }
       //black knight check all jumps
       if(piece === 'n'){
-        if((toIndex - fromIndex === -17 ||  toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
+        if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 2){
           valid = true;
         }
-        if((toIndex - fromIndex === 17 ||  toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
+        if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -2){
           valid = true;
         }
-        if((toIndex - fromIndex === -6 ||  toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
+        if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
           valid = true;
         }
-        if((toIndex - fromIndex === 6 ||  toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
+        if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
           valid = true;
         }
       }
       //white king check
       if(piece === 'K'){
-        if(((toIndex === 58 && moveObject.CastlingWq) || (toIndex === 62 && moveObject.CastlingWk)) && fromIndex === 60){
+        if(((toIndex === 58 && mo.CastlingWq) || (toIndex === 62 && mo.CastlingWk)) && fromIndex === 60){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
             valid = true;
           }
@@ -249,7 +252,7 @@ export default Controller.extend({
       }
       //black king check
       if(piece === 'k'){
-        if(((toIndex === 2 && moveObject.CastlingBq) || (toIndex === 6 && moveObject.CastlingBk)) && fromIndex === 4){
+        if(((toIndex === 2 && mo.CastlingBq) || (toIndex === 6 && mo.CastlingBk)) && fromIndex === 4){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
             valid = true;
           }
@@ -272,13 +275,13 @@ export default Controller.extend({
         }
       }
     }
-    moveObject.valid = valid;
-    return moveObject
+    mo.valid = valid;
+    return mo;
   },
 
   makeMove(moveObject){
-    var fen = moveObject.Fen;
-    var mo = moveObject;
+    var mo = Object.assign(moveObject);
+    var fen = mo.Fen;
     if(fen){
       //fen--->b
       var info = fen;
@@ -288,7 +291,7 @@ export default Controller.extend({
       var extra = info.split(" ");
       if(extra[0].toLowerCase() === 'w'){
         extra[0] = 'b';
-      } else{
+      } else if(extra[0].toLowerCase() === 'b'){
         extra[0] = 'w';
       }
       var fromIndex = moveObject.fromIndex;
@@ -301,8 +304,6 @@ export default Controller.extend({
       uci[1] = 8 - (Math.floor(fromIndex / 8));
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
-
-
 
       var piece = b[fromIndex];
       b[fromIndex] = 1;
@@ -344,11 +345,9 @@ export default Controller.extend({
       if(piece === 'R'){
         if(fromIndex === 56){
           extra[1] = extra[1].replace(/Q/,'');
-
         }
         if(fromIndex === 63){
           extra[1] = extra[1].replace(/K/,'');
-
         }
       }
 
@@ -356,11 +355,9 @@ export default Controller.extend({
       if(piece === 'r'){
         if(fromIndex === 0){
           extra[1] = extra[1].replace(/q/,'');
-
         }
         if(fromIndex === 7){
           extra[1] = extra[1].replace(/k/,'');
-
         }
       }
       extra[2] = '-';
@@ -430,6 +427,7 @@ export default Controller.extend({
     }
     mo.b = b;
     mo.Fen = newfen;
+    console.log("abc" + newfen);
     return mo;
   },
 
@@ -454,25 +452,21 @@ export default Controller.extend({
         return false;
       }
     }
-
     if(piece === 'R'|| piece === 'r'){
       if(difX !== 0 && difY !== 0){
         return false;
       }
     }
-
     if(piece === 'B'|| piece === 'b'){
       if(difX !== difY){
         return false;
       }
     }
-
     if(piece === 'K'|| piece === 'k'){
       if(difX > 1 || difY > 1){
         return false;
       }
     }
-
     if(piece === 'K0-0'|| piece === 'k0-0'){
       if(difX !== 2 && difY !== 0){
         return false;
@@ -518,7 +512,6 @@ export default Controller.extend({
 
   uciToNumber(uci){
      return uci.toLowerCase().charCodeAt(0) - 96;
-
   },
 
   fenToMbn(fen){
@@ -551,7 +544,7 @@ export default Controller.extend({
   },
 
   mvToMoveObject(fenInfo, mv, b){
-    var moveObject = fenInfo;
+    var moveObject = Object.assign(fenInfo);
     var valid = false;
     if(mv && mv.length > 3 && mv.length < 6){
       valid = true;
@@ -576,11 +569,12 @@ export default Controller.extend({
   actions: {
     playMove() {
       var mv = get(this,'move');
-      var fenInfo = get(this,'fenInfo');
+      var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       var b =  get(this,'boardArray').toArray();
-      var moveObject = this.mvToMoveObject(fenInfo, mv, b);
+      var moveObject = this.mvToMoveObject(fi, mv, b);
       var newMoveObject = this.makeMove(moveObject);
-      console.log(newMoveObject.Fen);
+      console.log("kip");
+      console.log(newMoveObject);
       set(this, 'fen' , newMoveObject.Fen);
     }
   }
