@@ -122,7 +122,8 @@ export default Controller.extend({
 
   checkValid(moveObject){
     var valid = false;
-    var mo = Object.assign(moveObject);
+    var mo = JSON.parse(JSON.stringify(moveObject));
+
 
     if(mo.valid) {
 
@@ -163,12 +164,12 @@ export default Controller.extend({
           valid = true;
         }
         //e4d5
-        if((fromIndex - toIndex === 9  || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
+        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3]-uci[1] === 1) {
           valid = true;
         }
         //e5d6
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === 1){
-          if(mo.EnPassant === toIndex){
+          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
             valid = true;
           }
         }
@@ -196,7 +197,7 @@ export default Controller.extend({
         }
         //d4e3
         if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3]-uci[1] === -1){
-          if(mo.EnPassant === toIndex){
+          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
           valid = true;
           }
         }
@@ -280,7 +281,7 @@ export default Controller.extend({
   },
 
   makeMove(moveObject){
-    var mo = Object.assign(moveObject);
+    var mo = JSON.parse(JSON.stringify(moveObject));
     var fen = mo.Fen;
     if(fen){
       //fen--->b
@@ -544,7 +545,7 @@ export default Controller.extend({
   },
 
   mvToMoveObject(fenInfo, mv, b){
-    var moveObject = Object.assign(fenInfo);
+    var mo = JSON.parse(JSON.stringify(fenInfo));
     var valid = false;
     if(mv && mv.length > 3 && mv.length < 6){
       valid = true;
@@ -555,15 +556,15 @@ export default Controller.extend({
       res[1] = uci[2] + uci[3];
       res[2] = uci[4];
 
-      moveObject.fromIndex = this.algebraicToIndex(res[0]);
-      moveObject.toIndex = this.algebraicToIndex(res[1]);
+      mo.fromIndex = this.algebraicToIndex(res[0]);
+      mo.toIndex = this.algebraicToIndex(res[1]);
       if(res[2]){
-        moveObject.piecePromotion = res[2].toLowerCase();
+        mo.piecePromotion = res[2].toLowerCase();
       }
-      moveObject.b = b;
+      mo.b = b;
     }
-    moveObject.valid = valid;
-    return moveObject;
+    mo.valid = valid;
+    return mo;
   },
 
   actions: {
