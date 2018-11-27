@@ -68,19 +68,18 @@ export default Controller.extend({
       valid = true;
 
       var afterMoveObject = this.makeMove(moveObject);
-  //    var martin = this.makeMove(moveObject);
       for(var i = 0;  i < afterMoveObject.b.length; i++){
         if(afterMoveObject.b[i] === 'K'){
           afterMoveObject.toIndex = i;
-          // console.log(i);
+          console.log(i);
         }
       }
       for(var j = 0;  j < afterMoveObject.b.length; j++){
         if(afterMoveObject.b[j] === 'q'){
           afterMoveObject.fromIndex = j;
-        //  var fromNewMoveObject = this.checkValid(afterMoveObject);
-          // console.log(j);
-          // console.log(afterMoveObject);
+          var fromNewMoveObject = this.checkValid(afterMoveObject);
+          console.log(j);
+          console.log(fromNewMoveObject);
         }
       }
     } else{
@@ -140,6 +139,7 @@ export default Controller.extend({
       uci[3] = 8 - (Math.floor(toIndex / 8));
 
       var piece = b[fromIndex];
+
       if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
         mo.valid = false;
         return mo
@@ -152,7 +152,6 @@ export default Controller.extend({
         mo.valid = false;
         return mo
       }
-
       // WhitePawnCheck
       if(piece === 'P'){
         //e2e3
@@ -281,7 +280,7 @@ export default Controller.extend({
   },
 
   makeMove(moveObject){
-    var mo = JSON.parse(JSON.stringify(moveObject));
+    var mo= JSON.parse(JSON.stringify(moveObject));
     var fen = mo.Fen;
     if(fen){
       //fen--->b
@@ -290,15 +289,18 @@ export default Controller.extend({
       fen = fen.replace(/\//g,'');
       info = info.replace(/^.+? /,'');
       var extra = info.split(" ");
+
       if(extra[0].toLowerCase() === 'w'){
         extra[0] = 'b';
+        mo.ToMove = 'b';
       } else if(extra[0].toLowerCase() === 'b'){
         extra[0] = 'w';
+        mo.ToMove = 'w';
       }
-      var fromIndex = moveObject.fromIndex;
-      var toIndex = moveObject.toIndex;
-      var piecePromotion = moveObject.piecePromotion;
-      var b = moveObject.b;
+      var fromIndex = mo.fromIndex;
+      var toIndex = mo.toIndex;
+      var piecePromotion = mo.piecePromotion;
+      var b = mo.b;
 
       var uci = [];
       uci[0] = (fromIndex % 8) + 1;
@@ -374,7 +376,7 @@ export default Controller.extend({
           extra[2] = this.indexToAlgebraic(fromIndex - 8);
         }
         //WhitePawnEP
-        if(this.algebraicToIndex(moveObject.EnPassant) === toIndex){
+        if(this.algebraicToIndex(mo.EnPassant) === toIndex){
           b[toIndex + 8] = 1;
         }
       }
@@ -390,7 +392,7 @@ export default Controller.extend({
           extra[2] = this.indexToAlgebraic(fromIndex + 8);
         }
         // BlackPawnEP
-        if(this.algebraicToIndex(moveObject.EnPassant) === toIndex){
+        if(this.algebraicToIndex(mo.EnPassant) === toIndex){
           b[toIndex - 8] = 1;
         }
       }
@@ -428,7 +430,6 @@ export default Controller.extend({
     }
     mo.b = b;
     mo.Fen = newfen;
-    console.log("abc" + newfen);
     return mo;
   },
 
@@ -574,7 +575,6 @@ export default Controller.extend({
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fi, mv, b);
       var newMoveObject = this.makeMove(moveObject);
-      console.log("kip");
       console.log(newMoveObject);
       set(this, 'fen' , newMoveObject.Fen);
     }
