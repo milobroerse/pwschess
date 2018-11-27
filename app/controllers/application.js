@@ -68,18 +68,35 @@ export default Controller.extend({
       valid = true;
 
       var afterMoveObject = this.makeMove(moveObject);
-      for(var i = 0;  i < afterMoveObject.b.length; i++){
-        if(afterMoveObject.b[i] === 'K'){
-          afterMoveObject.toIndex = i;
-          console.log(i);
+      if(afterMoveObject.ToMove === 'w'){
+        for(var i = 0;  i < afterMoveObject.b.length; i++){
+          if(afterMoveObject.b[i] === 'k'){
+            afterMoveObject.toIndex = i;
+          }
         }
-      }
-      for(var j = 0;  j < afterMoveObject.b.length; j++){
-        if(afterMoveObject.b[j] === 'q'){
-          afterMoveObject.fromIndex = j;
-          var fromNewMoveObject = this.checkValid(afterMoveObject);
-          console.log(j);
-          console.log(fromNewMoveObject);
+        for(var j = 0;  j < afterMoveObject.b.length; j++){
+          if(this.isWhite(afterMoveObject.b[j])){
+            afterMoveObject.fromIndex = j;
+            var fromNewMoveObjectW = this.checkValid(afterMoveObject);
+            if(fromNewMoveObjectW.valid){
+              valid = false;
+            }
+          }
+        }
+      } else{
+        for(var p = 0;  p < afterMoveObject.b.length; p++){
+          if(afterMoveObject.b[p] === 'K'){
+            afterMoveObject.toIndex = p;
+          }
+        }
+        for(var u = 0;  u < afterMoveObject.b.length; u++){
+          if(this.isBlack(afterMoveObject.b[u])){
+            afterMoveObject.fromIndex = u;
+            var fromNewMoveObjectB = this.checkValid(afterMoveObject);
+            if(fromNewMoveObjectB.valid){
+              valid = false;
+            }
+          }
         }
       }
     } else{
