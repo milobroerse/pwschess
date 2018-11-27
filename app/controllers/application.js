@@ -79,6 +79,17 @@ export default Controller.extend({
             if(fromNewMoveObjectW.valid){
               valid = false;
             }
+            if(afterMoveObject.CastlingCheck){
+              if(afterMoveObject.toIndex === 2){
+                fromNewMoveObjectW = 3;
+              } else{
+                fromNewMoveObjectW = 5;
+              }
+              fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectW.valid){
+                valid = false;
+              }
+            }
           }
         }
       } else{
@@ -93,6 +104,17 @@ export default Controller.extend({
             var fromNewMoveObjectB = this.checkValid(afterMoveObject);
             if(fromNewMoveObjectB.valid){
               valid = false;
+            }
+            if(afterMoveObject.CastlingCheck){
+              if(afterMoveObject.toIndex === 58){
+                fromNewMoveObjectB = 59;
+              } else{
+                fromNewMoveObjectB = 61;
+              }
+              fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectB.valid){
+                valid = false;
+              }
             }
           }
         }
@@ -334,12 +356,14 @@ export default Controller.extend({
         extra[1] = extra[1].replace(/Q/,'');
         //Castle
         if(toIndex === 62 && fromIndex === 60){
-            b[63] = 1;
-            b[61] = 'R';
+          b[63] = 1;
+          b[61] = 'R';
+          mo.CastlingCheck = true;
         }
         if(toIndex === 58 && fromIndex === 60){
           b[56] = 1;
           b[59] = 'R';
+          mo.CastlingCheck = true;
         }
       }
 
@@ -350,12 +374,14 @@ export default Controller.extend({
         extra[1] = extra[1].replace(/q/,'');
         //Castle
         if(toIndex === 2 && fromIndex === 4){
-            b[0] = 1;
-            b[3] = 'r';
+          b[0] = 1;
+          b[3] = 'r';
+          mo.CastlingCheck = true;
         }
         if(toIndex === 6 && fromIndex === 4){
           b[7] = 1;
           b[5] = 'r';
+          mo.CastlingCheck = true;
         }
       }
 
