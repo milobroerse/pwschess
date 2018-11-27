@@ -56,10 +56,8 @@ export default Controller.extend({
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
     var valid = false;
-    console.log('valid move check');
     var mv = get(this,'move');
     var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
-    console.log(fi);
     var b =  get(this,'boardArray').toArray();
     var moveObject = this.mvToMoveObject(fi, mv, b);
     var newMoveObject = this.checkValid(moveObject);
@@ -335,11 +333,11 @@ export default Controller.extend({
         extra[1] = extra[1].replace(/K/,'');
         extra[1] = extra[1].replace(/Q/,'');
         //Castle
-        if(toIndex === 62){
+        if(toIndex === 62 && fromIndex === 60){
             b[63] = 1;
             b[61] = 'R';
         }
-        if(toIndex === 58){
+        if(toIndex === 58 && fromIndex === 60){
           b[56] = 1;
           b[59] = 'R';
         }
@@ -351,11 +349,11 @@ export default Controller.extend({
         extra[1] = extra[1].replace(/k/,'');
         extra[1] = extra[1].replace(/q/,'');
         //Castle
-        if(toIndex === 2){
+        if(toIndex === 2 && fromIndex === 4){
             b[0] = 1;
             b[3] = 'r';
         }
-        if(toIndex === 6){
+        if(toIndex === 6 && fromIndex === 4){
           b[7] = 1;
           b[5] = 'r';
         }
