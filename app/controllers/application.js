@@ -81,9 +81,9 @@ export default Controller.extend({
             }
             if(afterMoveObject.CastlingCheck){
               if(afterMoveObject.toIndex === 2){
-                fromNewMoveObjectW = 3;
+                fromNewMoveObjectW.toIndex = 3;
               } else{
-                fromNewMoveObjectW = 5;
+                fromNewMoveObjectW.toIndex = 5;
               }
               fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
               if(fromNewMoveObjectW.valid){
@@ -107,9 +107,9 @@ export default Controller.extend({
             }
             if(afterMoveObject.CastlingCheck){
               if(afterMoveObject.toIndex === 58){
-                fromNewMoveObjectB = 59;
+                fromNewMoveObjectB.toIndex = 59;
               } else{
-                fromNewMoveObjectB = 61;
+                fromNewMoveObjectB.toIndex = 61;
               }
               fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
               if(fromNewMoveObjectB.valid){
@@ -159,7 +159,6 @@ export default Controller.extend({
   checkValid(moveObject){
     var valid = false;
     var mo = JSON.parse(JSON.stringify(moveObject));
-
 
     if(mo.valid) {
 
@@ -312,6 +311,7 @@ export default Controller.extend({
         }
       }
     }
+    console.log(mo);
     mo.valid = valid;
     return mo;
   },
