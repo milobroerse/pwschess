@@ -85,6 +85,13 @@ export default Controller.extend({
               } else{
                 fromNewMoveObjectW.toIndex = 5;
               }
+              fromNewMoveObjectW.valid = true;
+              fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectW.valid){
+                valid = false;
+              }
+              fromNewMoveObjectW.toIndex = 4;
+              fromNewMoveObjectW.valid = true;
               fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
               if(fromNewMoveObjectW.valid){
                 valid = false;
@@ -111,9 +118,17 @@ export default Controller.extend({
               } else{
                 fromNewMoveObjectB.toIndex = 61;
               }
+              fromNewMoveObjectB.valid = true;
               fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
               if(fromNewMoveObjectB.valid){
                 valid = false;
+              }
+              fromNewMoveObjectB.toIndex = 60;
+              fromNewMoveObjectB.valid = true;
+              fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectB.valid){
+                valid = false;
+
               }
             }
           }
