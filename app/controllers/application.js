@@ -55,89 +55,12 @@ export default Controller.extend({
   }),
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
-    var valid = false;
     var mv = get(this,'move');
     var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
     var b =  get(this,'boardArray').toArray();
     var moveObject = this.mvToMoveObject(fi, mv, b);
-    var newMoveObject = this.checkValid(moveObject);
 
-    if(newMoveObject.valid){
-      valid = true;
-
-      var afterMoveObject = this.makeMove(moveObject);
-      if(afterMoveObject.ToMove === 'w'){
-        for(var i = 0;  i < afterMoveObject.b.length; i++){
-          if(afterMoveObject.b[i] === 'k'){
-            afterMoveObject.toIndex = i;
-          }
-        }
-        for(var j = 0;  j < afterMoveObject.b.length; j++){
-          if(this.isWhite(afterMoveObject.b[j])){
-            afterMoveObject.fromIndex = j;
-            var fromNewMoveObjectW = this.checkValid(afterMoveObject);
-            if(fromNewMoveObjectW.valid){
-              valid = false;
-            }
-            if(afterMoveObject.CastlingCheck){
-              if(afterMoveObject.toIndex === 2){
-                fromNewMoveObjectW.toIndex = 3;
-              } else{
-                fromNewMoveObjectW.toIndex = 5;
-              }
-              fromNewMoveObjectW.valid = true;
-              fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectW.valid){
-                valid = false;
-              }
-              fromNewMoveObjectW.toIndex = 4;
-              fromNewMoveObjectW.valid = true;
-              fromNewMoveObjectW = this.checkValid(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectW.valid){
-                valid = false;
-              }
-            }
-          }
-        }
-      } else{
-        for(var p = 0;  p < afterMoveObject.b.length; p++){
-          if(afterMoveObject.b[p] === 'K'){
-            afterMoveObject.toIndex = p;
-          }
-        }
-        for(var u = 0;  u < afterMoveObject.b.length; u++){
-          if(this.isBlack(afterMoveObject.b[u])){
-            afterMoveObject.fromIndex = u;
-            var fromNewMoveObjectB = this.checkValid(afterMoveObject);
-            if(fromNewMoveObjectB.valid){
-              valid = false;
-            }
-            if(afterMoveObject.CastlingCheck){
-              if(afterMoveObject.toIndex === 58){
-                fromNewMoveObjectB.toIndex = 59;
-              } else{
-                fromNewMoveObjectB.toIndex = 61;
-              }
-              fromNewMoveObjectB.valid = true;
-              fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectB.valid){
-                valid = false;
-              }
-              fromNewMoveObjectB.toIndex = 60;
-              fromNewMoveObjectB.valid = true;
-              fromNewMoveObjectB = this.checkValid(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectB.valid){
-                valid = false;
-
-              }
-            }
-          }
-        }
-      }
-    } else{
-      valid = false;
-    }
-    return valid;
+    return this.checkValid(moveObject);
   }),
 
   tiles: computed('board', 'boardArray', function() {
@@ -172,6 +95,86 @@ export default Controller.extend({
   }),
 
   checkValid(moveObject){
+    var valid = false;
+    var newMoveObject = this.checkMove(moveObject);
+
+    if(newMoveObject.valid){
+      valid = true;
+      var afterMoveObject = this.makeMove(moveObject);
+      if(afterMoveObject.ToMove === 'w'){
+        for(var i = 0;  i < afterMoveObject.b.length; i++){
+          if(afterMoveObject.b[i] === 'k'){
+            afterMoveObject.toIndex = i;
+          }
+        }
+        for(var j = 0;  j < afterMoveObject.b.length; j++){
+          if(this.isWhite(afterMoveObject.b[j])){
+            afterMoveObject.fromIndex = j;
+            var fromNewMoveObjectW = this.checkMove(afterMoveObject);
+            if(fromNewMoveObjectW.valid){
+              valid = false;
+            }
+            if(afterMoveObject.CastlingCheck){
+              if(afterMoveObject.toIndex === 2){
+                fromNewMoveObjectW.toIndex = 3;
+              } else{
+                fromNewMoveObjectW.toIndex = 5;
+              }
+              fromNewMoveObjectW.valid = true;
+              fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectW.valid){
+                valid = false;
+              }
+              fromNewMoveObjectW.toIndex = 4;
+              fromNewMoveObjectW.valid = true;
+              fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectW.valid){
+                valid = false;
+              }
+            }
+          }
+        }
+      } else{
+        for(var p = 0;  p < afterMoveObject.b.length; p++){
+          if(afterMoveObject.b[p] === 'K'){
+            afterMoveObject.toIndex = p;
+          }
+        }
+        for(var u = 0;  u < afterMoveObject.b.length; u++){
+          if(this.isBlack(afterMoveObject.b[u])){
+            afterMoveObject.fromIndex = u;
+            var fromNewMoveObjectB = this.checkMove(afterMoveObject);
+            if(fromNewMoveObjectB.valid){
+              valid = false;
+            }
+            if(afterMoveObject.CastlingCheck){
+              if(afterMoveObject.toIndex === 58){
+                fromNewMoveObjectB.toIndex = 59;
+              } else{
+                fromNewMoveObjectB.toIndex = 61;
+              }
+              fromNewMoveObjectB.valid = true;
+              fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectB.valid){
+                valid = false;
+              }
+              fromNewMoveObjectB.toIndex = 60;
+              fromNewMoveObjectB.valid = true;
+              fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+              if(fromNewMoveObjectB.valid){
+                valid = false;
+              }
+            }
+          }
+        }
+      }
+    } else{
+      valid = false;
+    }
+    return valid;
+  },
+
+  checkMove(moveObject){
     var valid = false;
     var mo = JSON.parse(JSON.stringify(moveObject));
 
