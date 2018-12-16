@@ -329,7 +329,7 @@ export default Controller.extend({
         }
       }
     }
-    console.log(mo);
+    //console.log(mo);
     mo.valid = valid;
     return mo;
   },
@@ -634,8 +634,25 @@ export default Controller.extend({
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fi, mv, b);
       var newMoveObject = this.makeMove(moveObject);
-      console.log(newMoveObject);
-      set(this, 'fen' , newMoveObject.Fen);
+      var check = false;
+      var newMoveObjectBX;
+      while (!check){
+        for(var z = 0;  z < newMoveObject.b.length; z++){
+          if(this.isBlack(newMoveObject.b[z]) && !check){
+            newMoveObject.fromIndex = z;
+            if(!check){
+              newMoveObject.toIndex = Math.floor(Math.random() * 63);
+              if(newMoveObject.fromIndex !== newMoveObject.toIndex){
+                newMoveObject.valid = true;
+                check = this.checkValid(newMoveObject);
+              }
+            }
+          }
+        }
+      }
+      console.log('ok');
+      newMoveObjectBX = this.makeMove(newMoveObject);
+      set(this, 'fen' , newMoveObjectBX.Fen);
     }
   }
 });
