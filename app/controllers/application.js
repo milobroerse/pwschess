@@ -633,26 +633,29 @@ export default Controller.extend({
       var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fi, mv, b);
-      var newMoveObject = this.makeMove(moveObject);
-      var check = false;
-      var newMoveObjectBX;
-      while (!check){
-        for(var z = 0;  z < newMoveObject.b.length; z++){
-          if(this.isBlack(newMoveObject.b[z]) && !check){
-            newMoveObject.fromIndex = z;
-            if(!check){
-              newMoveObject.toIndex = Math.floor(Math.random() * 63);
-              if(newMoveObject.fromIndex !== newMoveObject.toIndex){
-                newMoveObject.valid = true;
-                check = this.checkValid(newMoveObject);
+      if(this.checkValid(moveObject)){
+        var newMoveObject = this.makeMove(moveObject);
+        var check = false;
+        var newMoveObjectBX;
+        while (!check){
+          for(var z = 0;  z < newMoveObject.b.length; z++){
+            if(this.isBlack(newMoveObject.b[z]) && !check){
+              newMoveObject.fromIndex = z;
+              if(!check){
+                newMoveObject.toIndex = Math.floor(Math.random() * 63);
+                if(newMoveObject.fromIndex !== newMoveObject.toIndex){
+                  newMoveObject.valid = true;
+                  check = this.checkValid(newMoveObject);
+                }
               }
             }
           }
         }
+        console.log('ok');
+        newMoveObjectBX = this.makeMove(newMoveObject);
+        set(this, 'fen', newMoveObjectBX.Fen);
+        set(this, 'move', '');
       }
-      console.log('ok');
-      newMoveObjectBX = this.makeMove(newMoveObject);
-      set(this, 'fen' , newMoveObjectBX.Fen);
     }
   }
 });
