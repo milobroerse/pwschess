@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { computed, get, set} from '@ember/object';
+import { later } from '@ember/runloop';
 
 export default Controller.extend({
   queryParams: ['fen'],
@@ -633,32 +634,39 @@ export default Controller.extend({
       var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fi, mv, b);
+
       if(this.checkValid(moveObject)){
         var newMoveObject = this.makeMove(moveObject);
-        var check = false;
-        var newMoveObjectBX;
-        while (!check){
-          for(var z = 0;  z < newMoveObject.b.length; z++){
-            if(this.isBlack(newMoveObject.b[z]) && !check){
-              newMoveObject.fromIndex = z;
-              if(!check){
-                newMoveObject.toIndex = Math.floor(Math.random() * 63);
-                if(newMoveObject.fromIndex !== newMoveObject.toIndex){
-                  newMoveObject.valid = true;
-                  check = this.checkValid(newMoveObject);
+        set(this, 'fen', newMoveObject.Fen);
+        later(()=>{
+          var mv = get(this,'move');
+          var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
+          var b =  get(this,'boardArray').toArray();
+          var newMoveObject = this.mvToMoveObject(fi, mv, b);
+
+          var check = false;
+          var newMoveObjectBX;
+          while (!check){
+            for(var z = 0;  z < newMoveObject.b.length; z++){
+              if(this.isBlack(newMoveObject.b[z]) && !check){
+                newMoveObject.fromIndex = z;
+                if(!check){
+                  newMoveObject.toIndex = Math.floor(Math.random() * 63);
+                  if(newMoveObject.fromIndex !== newMoveObject.toIndex){
+                    newMoveObject.valid = true;
+                    check = this.checkValid(newMoveObject);
+                  }
                 }
               }
             }
           }
-        }
-        console.log('ok');
-        newMoveObjectBX = this.makeMove(newMoveObject);
-        set(this, 'fen', newMoveObjectBX.Fen);
-        set(this, 'move', '');
+
+          console.log('ok');
+          newMoveObjectBX = this.makeMove(newMoveObject);
+          set(this, 'fen', newMoveObjectBX.Fen);
+          set(this, 'move', '');
+        }, 1500);
       }
     }
   }
 });
-
-
-// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
