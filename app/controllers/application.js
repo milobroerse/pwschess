@@ -662,20 +662,25 @@ export default Controller.extend({
           console.log(validArray);
           console.log('ok');
 
-          var arrayIndex = Math.floor(Math.random() * validArray.length - 1);
-          var arrayMove = validArray[arrayIndex];
-          var uci = arrayMove.split('');
-          var res = [];
+          if(validArray.length !== 0){
+            var arrayIndex = Math.floor(Math.random() * (validArray.length - 1));
+            console.log(arrayIndex);
+            var arrayMove = validArray[arrayIndex];
+            var uci = arrayMove.split('');
+            var res = [];
 
-          res[0] = uci[0] + uci[1];
-          res[1] = uci[2] + uci[3];
-          res[2] = uci[4];
+            res[0] = uci[0] + uci[1];
+            res[1] = uci[2] + uci[3];
+            res[2] = uci[4];
 
-          newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
-          newMoveObject.toIndex = this.algebraicToIndex(res[1]);
-          newMoveObjectBX = this.makeMove(newMoveObject);
-          set(this, 'fen', newMoveObjectBX.Fen);
-          set(this, 'move', '');
+            newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
+            newMoveObject.toIndex = this.algebraicToIndex(res[1]);
+            newMoveObjectBX = this.makeMove(newMoveObject);
+            set(this, 'fen', newMoveObjectBX.Fen);
+            set(this, 'move', '');
+          } else{
+            console.log("pat of mat");
+          }
         }, 1500);
       }
     }
