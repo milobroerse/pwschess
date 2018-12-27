@@ -18,16 +18,16 @@
 
 .board{
     border: 10px solid gray;
-    height: 600px;
+    height: 400px;
     margin-left: auto;
     margin-right: auto;
-    width: 600px;
+    width: 400px;
 }
 .tile{
     background-size: contain;
     float: left;
-    height: 75px;
-    width: 75px;
+    height: 50px;
+    width: 50px;
 }
 
 .black{

@@ -102,35 +102,39 @@ export default Controller.extend({
     if(newMoveObject.valid){
       valid = true;
       var afterMoveObject = this.makeMove(moveObject);
+      var kf = false;
       if(afterMoveObject.ToMove === 'w'){
         for(var i = 0;  i < afterMoveObject.b.length; i++){
           if(afterMoveObject.b[i] === 'k'){
             afterMoveObject.toIndex = i;
+            kf = true;
           }
         }
-        for(var j = 0;  j < afterMoveObject.b.length; j++){
-          if(this.isWhite(afterMoveObject.b[j])){
-            afterMoveObject.fromIndex = j;
-            var fromNewMoveObjectW = this.checkMove(afterMoveObject);
-            if(fromNewMoveObjectW.valid){
-              valid = false;
-            }
-            if(afterMoveObject.CastlingCheck){
-              if(afterMoveObject.toIndex === 2){
-                fromNewMoveObjectW.toIndex = 3;
-              } else{
-                fromNewMoveObjectW.toIndex = 5;
-              }
-              fromNewMoveObjectW.valid = true;
-              fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+        if(kf){
+          for(var j = 0;  j < afterMoveObject.b.length; j++){
+            if(this.isWhite(afterMoveObject.b[j])){
+              afterMoveObject.fromIndex = j;
+              var fromNewMoveObjectW = this.checkMove(afterMoveObject);
               if(fromNewMoveObjectW.valid){
                 valid = false;
               }
-              fromNewMoveObjectW.toIndex = 4;
-              fromNewMoveObjectW.valid = true;
-              fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectW.valid){
-                valid = false;
+              if(afterMoveObject.CastlingCheck){
+                if(afterMoveObject.toIndex === 2){
+                  fromNewMoveObjectW.toIndex = 3;
+                } else{
+                  fromNewMoveObjectW.toIndex = 5;
+                }
+                fromNewMoveObjectW.valid = true;
+                fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+                if(fromNewMoveObjectW.valid){
+                  valid = false;
+                }
+                fromNewMoveObjectW.toIndex = 4;
+                fromNewMoveObjectW.valid = true;
+                fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+                if(fromNewMoveObjectW.valid){
+                  valid = false;
+                }
               }
             }
           }
@@ -139,31 +143,34 @@ export default Controller.extend({
         for(var p = 0;  p < afterMoveObject.b.length; p++){
           if(afterMoveObject.b[p] === 'K'){
             afterMoveObject.toIndex = p;
+            kf = true;
           }
         }
-        for(var u = 0;  u < afterMoveObject.b.length; u++){
-          if(this.isBlack(afterMoveObject.b[u])){
-            afterMoveObject.fromIndex = u;
-            var fromNewMoveObjectB = this.checkMove(afterMoveObject);
-            if(fromNewMoveObjectB.valid){
-              valid = false;
-            }
-            if(afterMoveObject.CastlingCheck){
-              if(afterMoveObject.toIndex === 58){
-                fromNewMoveObjectB.toIndex = 59;
-              } else{
-                fromNewMoveObjectB.toIndex = 61;
-              }
-              fromNewMoveObjectB.valid = true;
-              fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+        if(kf){
+          for(var u = 0;  u < afterMoveObject.b.length; u++){
+            if(this.isBlack(afterMoveObject.b[u])){
+              afterMoveObject.fromIndex = u;
+              var fromNewMoveObjectB = this.checkMove(afterMoveObject);
               if(fromNewMoveObjectB.valid){
                 valid = false;
               }
-              fromNewMoveObjectB.toIndex = 60;
-              fromNewMoveObjectB.valid = true;
-              fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-              if(fromNewMoveObjectB.valid){
-                valid = false;
+              if(afterMoveObject.CastlingCheck){
+                if(afterMoveObject.toIndex === 58){
+                  fromNewMoveObjectB.toIndex = 59;
+                } else{
+                  fromNewMoveObjectB.toIndex = 61;
+                }
+                fromNewMoveObjectB.valid = true;
+                fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+                if(fromNewMoveObjectB.valid){
+                  valid = false;
+                }
+                fromNewMoveObjectB.toIndex = 60;
+                fromNewMoveObjectB.valid = true;
+                fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
+                if(fromNewMoveObjectB.valid){
+                  valid = false;
+                }
               }
             }
           }
@@ -638,6 +645,7 @@ export default Controller.extend({
       if(this.checkValid(moveObject)){
         var newMoveObject = this.makeMove(moveObject);
         set(this, 'fen', newMoveObject.Fen);
+        // Ember Run Later
         later(()=>{
           var mv = get(this,'move');
           var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
@@ -663,8 +671,8 @@ export default Controller.extend({
           console.log('ok');
 
           if(validArray.length !== 0){
+            // Er zijn nog zetten
             var arrayIndex = Math.floor(Math.random() * (validArray.length - 1));
-            console.log(arrayIndex);
             var arrayMove = validArray[arrayIndex];
             var uci = arrayMove.split('');
             var res = [];
@@ -678,8 +686,32 @@ export default Controller.extend({
             newMoveObjectBX = this.makeMove(newMoveObject);
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
+
           } else{
-            console.log("pat of mat");
+            // Mat of Pat
+            var kingPosition;
+            var checkMateFlag = false;
+            for(var k = 0;  k < newMoveObject.b.length; k++){
+              if(newMoveObject.b[k] === 'k'){
+                kingPosition = k;
+              }
+            }
+            for(var p = 0;  p < newMoveObject.b.length; p++){
+              if(this.isWhite(newMoveObject.b[p]) && !checkMateFlag){
+                newMoveObject.fromIndex = p;
+                newMoveObject.toIndex = kingPosition;
+
+                newMoveObject.ToMove = 'w';
+                if(this.checkValid(newMoveObject)){
+                  checkMateFlag = true;
+                }
+              }
+            }
+            if(checkMateFlag){
+              console.log('mat')
+            } else{
+              console.log('pat')
+            }
           }
         }, 1500);
       }
