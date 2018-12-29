@@ -634,6 +634,94 @@ export default Controller.extend({
     mo.valid = valid;
     return mo;
   },
+  minimax(moveObject, depth, maximizingPlayer){
+    if(depth === 0){
+      return {
+        'mv':moveObject.mv,
+        'points':0  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        }
+    } else{
+      var moveObjectBX;
+      var validArray = [];
+      for(var z = 0;  z < moveObject.b.length; z++){
+        if(this.isBlack(moveObject.b[z])){
+          moveObject.fromIndex = z;
+          for(var d = 0; d < moveObject.b.length; d++){
+            moveObject.toIndex = d;
+            if(moveObject.fromIndex !== moveObject.toIndex){
+              moveObject.valid = true;
+              if(this.checkValid(moveObject)){
+                validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+              }
+            }
+          }
+        }
+      }
+      if(validArray.length !== 0){
+        console.log("ahahah");
+        if (maximizingPlayer){
+          var pointsMax = -1000000;
+          var mvMax = '';
+          for(var v = 0; v < validArray.length; v++){
+            var arrayMoveMax = validArray[v];
+            var uciMax = arrayMoveMax.split('');
+            var resMax = [];
+
+            resMax[0] = uciMax[0] + uciMax[1];
+            resMax[1] = uciMax[2] + uciMax[3];
+            resMax[2] = uciMax[4];
+
+            moveObject.fromIndex = this.algebraicToIndex(resMax[0]);
+            moveObject.toIndex = this.algebraicToIndex(resMax[1]);
+            moveObject.mv = arrayMoveMax;
+            moveObjectBX = this.makeMove(moveObject);
+            var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false);
+            if(minimaxObjectMax.points > pointsMax){
+              pointsMax = minimaxObjectMax.points;
+              mvMax = minimaxObjectMax.mv;
+            }
+          }
+          return {
+            'mv':mvMax,
+            'points':pointsMax
+            }
+        } else{
+          var pointsMin = 1000000;
+          var mvMin = '';
+          for(var o = 0; o < validArray.length; o++){
+            var arrayMoveMin = validArray[o];
+            var uciMin = arrayMoveMin.split('');
+            var resMin = [];
+
+            resMin[0] = uciMin[0] + uciMin[1];
+            resMin[1] = uciMin[2] + uciMin[3];
+            resMin[2] = uciMin[4];
+
+            moveObject.fromIndex = this.algebraicToIndex(resMin[0]);
+            moveObject.toIndex = this.algebraicToIndex(resMin[1]);
+            moveObject.mv = arrayMoveMin;
+            moveObjectBX = this.makeMove(moveObject);
+            var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true);
+            if(minimaxObjectMin.points < pointsMin){
+              pointsMin = minimaxObjectMin.points;
+              mvMin = minimaxObjectMin.mv;
+            }
+          }
+          return {
+            'mv':mvMin,
+            'points':pointsMin
+            }
+
+        }
+      } else{
+        console.log("sdasgdajksdajk");
+        return {
+          'mv':moveObject.mv,
+          'points':0 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          }
+      }
+    }
+  },
 
   actions: {
     playMove() {
@@ -651,6 +739,8 @@ export default Controller.extend({
           var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           var b = get(this,'boardArray').toArray();
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
+          var x = this.minimax(newMoveObject, 40, true);
+          console.log(x);
           var newMoveObjectBX;
           var validArray = [];
           for(var z = 0;  z < newMoveObject.b.length; z++){
