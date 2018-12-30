@@ -757,9 +757,9 @@ export default Controller.extend({
         }
       } else{
         console.log("sdasgdajksdajk");
-        var p = 1000000;
+        var p = -1000000;
         if(maximizingPlayer){
-          p= -1000000;
+          p = 1000000;
         }
         return {
           'mv':moveObject.mv,
@@ -785,32 +785,13 @@ export default Controller.extend({
           var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           var b = get(this,'boardArray').toArray();
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
-          var x = this.minimax(newMoveObject, 2, true);
-          console.log(x);
-          var newMoveObjectBX;
-          var validArray = [];
-          for(var z = 0;  z < newMoveObject.b.length; z++){
-            if(this.isBlack(newMoveObject.b[z])){
-              newMoveObject.fromIndex = z;
-              for(var d = 0; d < newMoveObject.b.length; d++){
-                newMoveObject.toIndex = d;
-                if(newMoveObject.fromIndex !== newMoveObject.toIndex){
-                  newMoveObject.valid = true;
-                  if(this.checkValid(newMoveObject)){
-                    validArray.push(this.indexToAlgebraic(newMoveObject.fromIndex) + this.indexToAlgebraic(newMoveObject.toIndex));
-                  }
-                }
-              }
-            }
-          }
-          console.log(validArray);
-          console.log('ok');
+          var minimaxMove = this.minimax(newMoveObject, 2, true);
+          if(minimaxMove.points === -1000000 || minimaxMove.points === 1000000){
+            console.log("mat of pat");
+          } else{
+            console.log(minimaxMove);
 
-          if(validArray.length !== 0){
-            // Er zijn nog zetten
-            var arrayIndex = Math.floor(Math.random() * (validArray.length - 1));
-            var arrayMove = validArray[arrayIndex];
-            var uci = arrayMove.split('');
+            var uci = minimaxMove.mv.split('');
             var res = [];
 
             res[0] = uci[0] + uci[1];
@@ -819,35 +800,9 @@ export default Controller.extend({
 
             newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
             newMoveObject.toIndex = this.algebraicToIndex(res[1]);
-            newMoveObjectBX = this.makeMove(newMoveObject);
+            var newMoveObjectBX = this.makeMove(newMoveObject);
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
-
-          } else{
-            // Mat of Pat
-            var kingPosition;
-            var checkMateFlag = false;
-            for(var k = 0;  k < newMoveObject.b.length; k++){
-              if(newMoveObject.b[k] === 'k'){
-                kingPosition = k;
-              }
-            }
-            for(var p = 0;  p < newMoveObject.b.length; p++){
-              if(this.isWhite(newMoveObject.b[p]) && !checkMateFlag){
-                newMoveObject.fromIndex = p;
-                newMoveObject.toIndex = kingPosition;
-
-                newMoveObject.ToMove = 'w';
-                if(this.checkValid(newMoveObject)){
-                  checkMateFlag = true;
-                }
-              }
-            }
-            if(checkMateFlag){
-              console.log('mat')
-            } else{
-              console.log('pat')
-            }
           }
         }, 1500);
       }
