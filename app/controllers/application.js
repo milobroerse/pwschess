@@ -643,9 +643,29 @@ export default Controller.extend({
   },
   minimax(moveObject, depth, maximizingPlayer){
     if(depth === 0){
+      var pointsHash = {
+        '1':0,
+        'p':100,
+        'n':300,
+        'b':300,
+        'r':500,
+        'q':900,
+        'k': 0,
+
+        'P':-100,
+        'N':-300,
+        'B':-300,
+        'R':-500,
+        'Q':-900,
+        'K': 0
+      };
+      var points = 0;
+      for(var c = 0; c < moveObject.b.length; c++){
+        points = points + pointsHash[moveObject.b[c]];
+      }
       return {
         'mv':moveObject.mv,
-        'points':0  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        'points': points
         }
     } else{
 //      console.log(moveObject);
@@ -684,6 +704,7 @@ export default Controller.extend({
       if(validArray.length !== 0){
         if(maximizingPlayer){
           var pointsMax = -1000000;
+          var mvMax = '';
           for(var v = 0; v < validArray.length; v++){
             var arrayMoveMax = validArray[v];
             var uciMax = arrayMoveMax.split('');
@@ -700,14 +721,16 @@ export default Controller.extend({
             var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false);
             if(minimaxObjectMax.points > pointsMax){
               pointsMax = minimaxObjectMax.points;
+              mvMax = arrayMoveMax;
             }
           }
           return {
-            'mv':arrayMoveMax,
+            'mv':mvMax,
             'points':pointsMax
             }
         } else{
           var pointsMin = 1000000;
+          var mvMin = '';
           for(var o = 0; o < validArray.length; o++){
             var arrayMoveMin = validArray[o];
             var uciMin = arrayMoveMin.split('');
@@ -724,10 +747,11 @@ export default Controller.extend({
             var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true);
             if(minimaxObjectMin.points < pointsMin){
               pointsMin = minimaxObjectMin.points;
+              mvMin = arrayMoveMin;
             }
           }
           return {
-            'mv':arrayMoveMin,
+            'mv':mvMin,
             'points':pointsMin
             }
         }
