@@ -495,8 +495,15 @@ export default Controller.extend({
       }
       newfen = newfen + ' ' + extra.join(' ');
     }
+    var EnPassant = extra[2];
+    EnPassant = EnPassant.replace(/-/g,'');
     mo.b = b;
     mo.Fen = newfen;
+    mo.CastlingWk = extra[1].includes("K");
+    mo.CastlingWq = extra[1].includes("Q");
+    mo.CastlingBk = extra[1].includes("k");
+    mo.CastlingBq = extra[1].includes("q");
+    mo.EnPassant =  EnPassant;
     return mo;
   },
 
@@ -641,27 +648,42 @@ export default Controller.extend({
         'points':0  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
     } else{
+//      console.log(moveObject);
       var moveObjectBX;
       var validArray = [];
       for(var z = 0;  z < moveObject.b.length; z++){
-        if(this.isBlack(moveObject.b[z])){
-          moveObject.fromIndex = z;
-          for(var d = 0; d < moveObject.b.length; d++){
-            moveObject.toIndex = d;
-            if(moveObject.fromIndex !== moveObject.toIndex){
-              moveObject.valid = true;
-              if(this.checkValid(moveObject)){
-                validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+        if(moveObject.ToMove === 'b'){
+          if(this.isBlack(moveObject.b[z])){
+            moveObject.fromIndex = z;
+            for(var d = 0; d < moveObject.b.length; d++){
+              moveObject.toIndex = d;
+              if(moveObject.fromIndex !== moveObject.toIndex){
+                moveObject.valid = true;
+                if(this.checkValid(moveObject)){
+                  validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+                }
+              }
+            }
+          }
+        } else{
+          if(this.isWhite(moveObject.b[z])){
+            moveObject.fromIndex = z;
+            for(var q = 0; q < moveObject.b.length; q++){
+              moveObject.toIndex = q;
+              if(moveObject.fromIndex !== moveObject.toIndex){
+                moveObject.valid = true;
+                if(this.checkValid(moveObject)){
+                  validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+                }
               }
             }
           }
         }
       }
+      console.log(validArray.length + "<- ->" + depth);
       if(validArray.length !== 0){
-        console.log("ahahah");
-        if (maximizingPlayer){
+        if(maximizingPlayer){
           var pointsMax = -1000000;
-          var mvMax = '';
           for(var v = 0; v < validArray.length; v++){
             var arrayMoveMax = validArray[v];
             var uciMax = arrayMoveMax.split('');
@@ -678,16 +700,14 @@ export default Controller.extend({
             var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false);
             if(minimaxObjectMax.points > pointsMax){
               pointsMax = minimaxObjectMax.points;
-              mvMax = minimaxObjectMax.mv;
             }
           }
           return {
-            'mv':mvMax,
+            'mv':arrayMoveMax,
             'points':pointsMax
             }
         } else{
           var pointsMin = 1000000;
-          var mvMin = '';
           for(var o = 0; o < validArray.length; o++){
             var arrayMoveMin = validArray[o];
             var uciMin = arrayMoveMin.split('');
@@ -704,20 +724,22 @@ export default Controller.extend({
             var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true);
             if(minimaxObjectMin.points < pointsMin){
               pointsMin = minimaxObjectMin.points;
-              mvMin = minimaxObjectMin.mv;
             }
           }
           return {
-            'mv':mvMin,
+            'mv':arrayMoveMin,
             'points':pointsMin
             }
-
         }
       } else{
         console.log("sdasgdajksdajk");
+        var p = 1000000;
+        if(maximizingPlayer){
+          p= -1000000;
+        }
         return {
           'mv':moveObject.mv,
-          'points':0 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          'points': p
           }
       }
     }
@@ -739,7 +761,7 @@ export default Controller.extend({
           var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           var b = get(this,'boardArray').toArray();
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
-          var x = this.minimax(newMoveObject, 40, true);
+          var x = this.minimax(newMoveObject, 2, true);
           console.log(x);
           var newMoveObjectBX;
           var validArray = [];
