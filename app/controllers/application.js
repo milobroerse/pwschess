@@ -557,7 +557,6 @@ export default Controller.extend({
     return valid;
   },
 
-
   isEmpty(piece){
     return piece === 1;
   },
@@ -641,7 +640,8 @@ export default Controller.extend({
     mo.valid = valid;
     return mo;
   },
-  minimax(moveObject, depth, maximizingPlayer){
+
+  minimax(moveObject, depth, maximizingPlayer, alpha, beta){
     if(depth === 0){
       var pointsHash = {
         '1':0,
@@ -671,36 +671,106 @@ export default Controller.extend({
 //      console.log(moveObject);
       var moveObjectBX;
       var validArray = [];
+
+      var grid = {
+        'p': [
+          [7],
+          [8,16],
+          [9]
+        ],
+        'P': [
+          [-7],
+          [-8,-16],
+          [-9]
+        ],
+        'n': [
+          [17],
+          [15],
+          [10],
+          [6],
+          [-6],
+          [-10],
+          [-15],
+          [-17]
+        ],
+        'b': [
+          [9,18,27,36,45,54,63],
+          [7,14,21,28,35,42,49],
+          [-7,-14,-21,-28,-35,-42,-49],
+          [-9,-18,-27,-36,-45,-54,-63]
+        ],
+        'r': [
+          [8,16,24,32,40,48,56],
+          [1,2,3,4,5,6,7],
+          [-1,-2,-3,-4,-5,-6,-7],
+          [-8,-16,-24,-32,-40,-48,-56]
+        ],
+        'q': [
+          [9,18,27,36,45,54,63],
+          [7,14,21,28,35,42,49],
+          [-7,-14,-21,-28,-35,-42,-49],
+          [-9,-18,-27,-36,-45,-54,-63],
+
+          [8,16,24,32,40,48,56],
+          [1,2,3,4,5,6,7],
+          [-1,-2,-3,-4,-5,-6,-7],
+          [-8,-16,-24,-32,-40,-48,-56]
+        ],
+        'k': [
+          [9],
+          [8],
+          [7],
+          [1,2],
+          [-1,-2],
+          [-7],
+          [-8],
+          [-9]
+        ]
+      };
       for(var z = 0;  z < moveObject.b.length; z++){
         if(moveObject.ToMove === 'b'){
           if(this.isBlack(moveObject.b[z])){
             moveObject.fromIndex = z;
-            for(var d = 0; d < moveObject.b.length; d++){
-              moveObject.toIndex = d;
-              if(moveObject.fromIndex !== moveObject.toIndex){
-                moveObject.valid = true;
+            var gridArray = grid[moveObject.b[z]];
+            for(var gA = 0; gA < gridArray.length; gA++){
+              var gridMove = gridArray[gA];
+              for(var gM = 0; gM < gridMove.length; gM++){
+                moveObject.toIndex = z + gridMove[gM];
+                moveObject.valid = true; // ???????????????????????????????????????????
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+                } else{
+                  break;
                 }
               }
             }
           }
         } else{
           if(this.isWhite(moveObject.b[z])){
+            var gridPiece = moveObject.b[z];
+            if(gridPiece !== 'P'){
+              gridPiece = gridPiece.toLowerCase();
+            }
             moveObject.fromIndex = z;
-            for(var q = 0; q < moveObject.b.length; q++){
-              moveObject.toIndex = q;
-              if(moveObject.fromIndex !== moveObject.toIndex){
-                moveObject.valid = true;
+            var gridArrayW = grid[gridPiece];
+            for(var gAW = 0; gAW < gridArrayW.length; gAW++){
+              var gridMoveW = gridArrayW[gAW];
+              for(var gMW = 0; gMW < gridMoveW.length; gMW++){
+                moveObject.toIndex = z + gridMoveW[gMW];
+                moveObject.valid = true; // ???????????????????????????????????????????
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
+                } else{
+                  break;
                 }
               }
             }
           }
         }
       }
-      console.log(validArray.length + "<- ->" + depth);
+      if(depth > 1){
+        console.log(validArray.length + "<- ->" + depth);
+      }
       if(validArray.length !== 0){
         if(maximizingPlayer){
           var pointsMax = -1000000;
@@ -718,10 +788,17 @@ export default Controller.extend({
             moveObject.toIndex = this.algebraicToIndex(resMax[1]);
             moveObject.mv = arrayMoveMax;
             moveObjectBX = this.makeMove(moveObject);
-            var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false);
+            var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
             if(minimaxObjectMax.points > pointsMax){
               pointsMax = minimaxObjectMax.points;
               mvMax = arrayMoveMax;
+            }
+            if(minimaxObjectMax.points > alpha){
+              alpha = minimaxObjectMax.points;
+            }
+            if(alpha >= beta){
+              console.log("breakMax");
+              break;
             }
           }
           return {
@@ -744,10 +821,17 @@ export default Controller.extend({
             moveObject.toIndex = this.algebraicToIndex(resMin[1]);
             moveObject.mv = arrayMoveMin;
             moveObjectBX = this.makeMove(moveObject);
-            var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true);
+            var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
             if(minimaxObjectMin.points < pointsMin){
               pointsMin = minimaxObjectMin.points;
               mvMin = arrayMoveMin;
+            }
+            if(minimaxObjectMin.points < beta){
+              beta = minimaxObjectMin.points;
+            }
+            if(alpha >= beta){
+              console.log("breakMin");
+              break;
             }
           }
           return {
@@ -756,7 +840,6 @@ export default Controller.extend({
             }
         }
       } else{
-        console.log("sdasgdajksdajk");
         var p = -1000000;
         if(maximizingPlayer){
           p = 1000000;
@@ -785,7 +868,7 @@ export default Controller.extend({
           var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           var b = get(this,'boardArray').toArray();
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
-          var minimaxMove = this.minimax(newMoveObject, 2, true);
+          var minimaxMove = this.minimax(newMoveObject, 2, true, -1000000, 1000000);
           if(minimaxMove.points === -1000000 || minimaxMove.points === 1000000){
             console.log("mat of pat");
           } else{
@@ -804,7 +887,7 @@ export default Controller.extend({
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
           }
-        }, 1500);
+        },500);
       }
     }
   }
