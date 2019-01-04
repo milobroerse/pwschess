@@ -32,8 +32,9 @@ export default Controller.extend({
     fen = fen.replace(/\//g,'');
 
     var i;
-    var index=0;
-    for( i = 0; i < fen.length; i++){
+    var index = 0;
+    var fenLength = fen.length;
+    for( i = 0; i < fenLength; i++){
       var f= fen[i];
       if(isNaN(f)){
         b[index] = f;
@@ -104,14 +105,18 @@ export default Controller.extend({
       var afterMoveObject = this.makeMove(moveObject);
       var kf = false;
       if(afterMoveObject.ToMove === 'w'){
-        for(var i = 0;  i < afterMoveObject.b.length; i++){
+        var i;
+        var afterMoveObjectBLengthI = afterMoveObject.b.length;
+        for(i = 0;  i < afterMoveObjectBLengthI; i++){
           if(afterMoveObject.b[i] === 'k'){
             afterMoveObject.toIndex = i;
             kf = true;
           }
         }
         if(kf){
-          for(var j = 0;  j < afterMoveObject.b.length; j++){
+          var j;
+          var afterMoveObjectBLengthJ = afterMoveObject.b.length;
+          for(j = 0;  j < afterMoveObjectBLengthJ; j++){
             if(this.isWhite(afterMoveObject.b[j])){
               afterMoveObject.fromIndex = j;
               var fromNewMoveObjectW = this.checkMove(afterMoveObject);
@@ -140,14 +145,18 @@ export default Controller.extend({
           }
         }
       } else{
-        for(var p = 0;  p < afterMoveObject.b.length; p++){
+        var p;
+        var afterMoveObjectBLengthP = afterMoveObject.b.length;
+        for( p = 0;  p < afterMoveObjectBLengthP; p++){
           if(afterMoveObject.b[p] === 'K'){
             afterMoveObject.toIndex = p;
             kf = true;
           }
         }
         if(kf){
-          for(var u = 0;  u < afterMoveObject.b.length; u++){
+          var u;
+          var afterMoveObjectBLengthU = afterMoveObject.b.length;
+          for(u = 0;  u < afterMoveObjectBLengthU; u++){
             if(this.isBlack(afterMoveObject.b[u])){
               afterMoveObject.fromIndex = u;
               var fromNewMoveObjectB = this.checkMove(afterMoveObject);
@@ -185,23 +194,17 @@ export default Controller.extend({
   checkMove(moveObject){
     var valid = false;
     var mo = JSON.parse(JSON.stringify(moveObject));
-
     if(mo.valid) {
-
       var fromIndex = mo.fromIndex;
       var toIndex = mo.toIndex;
       var piecePromotion = mo.piecePromotion;
       var b = mo.b;
-
       var uci = [];
-
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
-
       var piece = b[fromIndex];
-
       if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
         mo.valid = false;
         return mo
@@ -337,11 +340,9 @@ export default Controller.extend({
         }
       }
     }
-    //console.log(mo);
     mo.valid = valid;
     return mo;
   },
-
   makeMove(moveObject){
     var mo= JSON.parse(JSON.stringify(moveObject));
     var fen = mo.Fen;
@@ -364,17 +365,14 @@ export default Controller.extend({
       var toIndex = mo.toIndex;
       var piecePromotion = mo.piecePromotion;
       var b = mo.b;
-
       var uci = [];
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
-
       var piece = b[fromIndex];
       b[fromIndex] = 1;
       b[toIndex] = piece;
-
       //CastlingWhite
       if(piece === 'K'){
         //NoCastling
@@ -392,7 +390,6 @@ export default Controller.extend({
           mo.CastlingCheck = true;
         }
       }
-
       //CastlingBlack
       if(piece === 'k'){
         //NoCastling
@@ -410,7 +407,6 @@ export default Controller.extend({
           mo.CastlingCheck = true;
         }
       }
-
       //RookMoveNoCastlingWhite
       if(piece === 'R'){
         if(fromIndex === 56){
@@ -420,7 +416,6 @@ export default Controller.extend({
           extra[1] = extra[1].replace(/K/,'');
         }
       }
-
       //RookMoveNoCastlingBlack
       if(piece === 'r'){
         if(fromIndex === 0){
@@ -431,7 +426,6 @@ export default Controller.extend({
         }
       }
       extra[2] = '-';
-
       // WhitePawn
       if(piece === 'P'){
         // WhitePawnPromotion
@@ -447,7 +441,6 @@ export default Controller.extend({
           b[toIndex + 8] = 1;
         }
       }
-
       // BlackPawn
       if(piece === 'p'){
         // BlackPawnPromotion
@@ -463,11 +456,9 @@ export default Controller.extend({
           b[toIndex - 8] = 1;
         }
       }
-
       if(!extra[1]){
         extra[1] = '-';
       }
-
       //b--->fen
       var newfen = '';
       var loopCount = 0;
@@ -506,23 +497,19 @@ export default Controller.extend({
     mo.EnPassant =  EnPassant;
     return mo;
   },
-
   lineCheck(fromIndex, toIndex, b, piece){
     var valid = true;
     var fromX = fromIndex % 8;
     var fromY = Math.floor(fromIndex / 8);
     var toX = toIndex % 8;
     var toY = Math.floor(toIndex / 8);
-
     // nooit negatief
     var difX = Math.abs(fromX - toX);
     var difY = Math.abs(fromY - toY);
-
     //neemt de hoogste waarde en daarna berekent de dif.
     var maxXY = Math.max(difX, difY);
     var difMove = toIndex - fromIndex;
     var step = difMove / maxXY;
-
     if(piece === 'Q' || piece === 'q'){
       if(difX !== 0 && difY !== 0 && difX !== difY){
         return false;
@@ -548,15 +535,14 @@ export default Controller.extend({
         return false;
       }
     }
-
-    for(var j = fromIndex + step; j !== toIndex; j = j + step) {
+    var j;
+    for(j = fromIndex + step; j !== toIndex; j += step){
       if(!this.isEmpty(b[j])){
         valid = false;
       }
     }
     return valid;
   },
-
   isEmpty(piece){
     return piece === 1;
   },
@@ -568,7 +554,6 @@ export default Controller.extend({
       return false;
     }
   },
-
   isBlackOrEmpty(piece){
    return this.isBlack(piece) || piece === 1;
   },
@@ -580,15 +565,12 @@ export default Controller.extend({
       return false;
     }
   },
-
   isWhiteOrEmpty(piece){
-   return this.isWhite(piece) || piece === 1;
+    return this.isWhite(piece) || piece === 1;
   },
-
   uciToNumber(uci){
      return uci.toLowerCase().charCodeAt(0) - 96;
   },
-
   fenToMbn(fen){
     var code = fen.toLowerCase();
     if(code === fen){
@@ -597,27 +579,23 @@ export default Controller.extend({
       return 'w' + code;
     }
   },
-
   algebraicToIndex(alg){
     var piece = alg.split("");
     if (piece.length === 2){
       var x = this.uciToNumber(piece[0]);
       var y = piece[1];
       var index = (8-y)*8+x-1;
-
       return(index);
     } else{
       return -1;
     }
   },
-
   indexToAlgebraic(index){
     var t = (index % 8) + 1 ;
     var y = 8 - (Math.floor(index / 8));
     var x = String.fromCharCode(t + 96);
     return(x+y);
   },
-
   mvToMoveObject(fenInfo, mv, b){
     var mo = JSON.parse(JSON.stringify(fenInfo));
     var valid = false;
@@ -660,7 +638,9 @@ export default Controller.extend({
         'K': 0
       };
       var points = 0;
-      for(var c = 0; c < moveObject.b.length; c++){
+      var c;
+      var moveObjectBLengthC = moveObject.b.length;
+      for(c = 0; c < moveObjectBLengthC; c++){
         points = points + pointsHash[moveObject.b[c]];
       }
       return {
@@ -668,10 +648,8 @@ export default Controller.extend({
         'points': points
         }
     } else{
-//      console.log(moveObject);
       var moveObjectBX;
       var validArray = [];
-
       var grid = {
         'p': [
           [7],
@@ -727,16 +705,22 @@ export default Controller.extend({
           [-9]
         ]
       };
-      for(var z = 0;  z < moveObject.b.length; z++){
+      var z;
+      var moveObjectBLengthZ = moveObject.b.length;
+      for(z = 0;  z < moveObjectBLengthZ; z++){
         if(moveObject.ToMove === 'b'){
           if(this.isBlack(moveObject.b[z])){
             moveObject.fromIndex = z;
             var gridArray = grid[moveObject.b[z]];
-            for(var gA = 0; gA < gridArray.length; gA++){
+            var gA;
+            var gridArrayLength = gridArray.length;
+            for(gA = 0; gA < gridArrayLength ; gA++){
               var gridMove = gridArray[gA];
-              for(var gM = 0; gM < gridMove.length; gM++){
+              var gM;
+              var gridMoveLength = gridMove.length;
+              for(gM = 0; gM < gridMoveLength; gM++){
                 moveObject.toIndex = z + gridMove[gM];
-                moveObject.valid = true; // ???????????????????????????????????????????
+                moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                 } else{
@@ -753,11 +737,15 @@ export default Controller.extend({
             }
             moveObject.fromIndex = z;
             var gridArrayW = grid[gridPiece];
-            for(var gAW = 0; gAW < gridArrayW.length; gAW++){
+            var gAW;
+            var gridArrayLengthW = gridArrayW.length;
+            for(gAW = 0; gAW < gridArrayLengthW; gAW++){
               var gridMoveW = gridArrayW[gAW];
-              for(var gMW = 0; gMW < gridMoveW.length; gMW++){
+              var gMW;
+              var gridMoveLengthW = gridMoveW.length;
+              for(gMW = 0; gMW < gridMoveLengthW; gMW++){
                 moveObject.toIndex = z + gridMoveW[gMW];
-                moveObject.valid = true; // ???????????????????????????????????????????
+                moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                 } else{
@@ -775,7 +763,9 @@ export default Controller.extend({
         if(maximizingPlayer){
           var pointsMax = -1000000;
           var mvMax = '';
-          for(var v = 0; v < validArray.length; v++){
+          var v;
+          var validArrayLength = validArray.length;
+          for(v = 0; v < validArrayLength; v++){
             var arrayMoveMax = validArray[v];
             var uciMax = arrayMoveMax.split('');
             var resMax = [];
@@ -808,7 +798,9 @@ export default Controller.extend({
         } else{
           var pointsMin = 1000000;
           var mvMin = '';
-          for(var o = 0; o < validArray.length; o++){
+          var o;
+          var validArrayLengthO = validArray.length;
+          for(o = 0; o < validArrayLengthO; o++){
             var arrayMoveMin = validArray[o];
             var uciMin = arrayMoveMin.split('');
             var resMin = [];
@@ -851,14 +843,12 @@ export default Controller.extend({
       }
     }
   },
-
   actions: {
     playMove() {
       var mv = get(this,'move');
       var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       var b =  get(this,'boardArray').toArray();
       var moveObject = this.mvToMoveObject(fi, mv, b);
-
       if(this.checkValid(moveObject)){
         var newMoveObject = this.makeMove(moveObject);
         set(this, 'fen', newMoveObject.Fen);
@@ -873,14 +863,11 @@ export default Controller.extend({
             console.log("mat of pat");
           } else{
             console.log(minimaxMove);
-
             var uci = minimaxMove.mv.split('');
             var res = [];
-
             res[0] = uci[0] + uci[1];
             res[1] = uci[2] + uci[3];
             res[2] = uci[4];
-
             newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
             newMoveObject.toIndex = this.algebraicToIndex(res[1]);
             var newMoveObjectBX = this.makeMove(newMoveObject);
