@@ -34,13 +34,15 @@ export default Controller.extend({
     var i;
     var index = 0;
     var fenLength = fen.length;
-    for( i = 0; i < fenLength; i++){
-      var f= fen[i];
+    for(i = 0; i < fenLength; i++){
+      var f = fen[i];
       if(isNaN(f)){
         b[index] = f;
         index++;
       } else{
-        for(var j = 0; j < Number(f); j++){
+        var j;
+        var number = Number(f);
+        for(j = 0; j < number; j++){
           b[index] = 1;
           index++;
         }
@@ -344,7 +346,7 @@ export default Controller.extend({
     return mo;
   },
   makeMove(moveObject){
-    var mo= JSON.parse(JSON.stringify(moveObject));
+    var mo = JSON.parse(JSON.stringify(moveObject));
     var fen = mo.Fen;
     if(fen){
       //fen--->b
@@ -642,6 +644,15 @@ export default Controller.extend({
       var moveObjectBLengthC = moveObject.b.length;
       for(c = 0; c < moveObjectBLengthC; c++){
         points = points + pointsHash[moveObject.b[c]];
+        if (pointsHash[moveObject.b[c]]){
+          if(c === 27 || c === 28 ||c === 35 ||c === 36 ){
+            if (this.isWhite(moveObject.b[c])) {
+              points = points - 25;
+            } else {
+              points = points + 25;
+            }
+          }
+        }
       }
       return {
         'mv':moveObject.mv,
@@ -733,6 +744,7 @@ export default Controller.extend({
           if(this.isWhite(moveObject.b[z])){
             var gridPiece = moveObject.b[z];
             if(gridPiece !== 'P'){
+              console.log('lololololololo')
               gridPiece = gridPiece.toLowerCase();
             }
             moveObject.fromIndex = z;
