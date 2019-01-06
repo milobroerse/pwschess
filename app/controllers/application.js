@@ -23,6 +23,62 @@ export default Controller.extend({
     'K': 0
   }),
 
+  grid: Object.freeze({
+    'p': [
+      [7],
+      [8,16],
+      [9]
+    ],
+    'P': [
+      [-7],
+      [-8,-16],
+      [-9]
+    ],
+    'n': [
+      [17],
+      [15],
+      [10],
+      [6],
+      [-6],
+      [-10],
+      [-15],
+      [-17]
+    ],
+    'b': [
+      [9,18,27,36,45,54,63],
+      [7,14,21,28,35,42,49],
+      [-7,-14,-21,-28,-35,-42,-49],
+      [-9,-18,-27,-36,-45,-54,-63]
+    ],
+    'r': [
+      [8,16,24,32,40,48,56],
+      [1,2,3,4,5,6,7],
+      [-1,-2,-3,-4,-5,-6,-7],
+      [-8,-16,-24,-32,-40,-48,-56]
+    ],
+    'q': [
+      [9,18,27,36,45,54,63],
+      [7,14,21,28,35,42,49],
+      [-7,-14,-21,-28,-35,-42,-49],
+      [-9,-18,-27,-36,-45,-54,-63],
+
+      [8,16,24,32,40,48,56],
+      [1,2,3,4,5,6,7],
+      [-1,-2,-3,-4,-5,-6,-7],
+      [-8,-16,-24,-32,-40,-48,-56]
+    ],
+    'k': [
+      [9],
+      [8],
+      [7],
+      [1,2],
+      [-1,-2],
+      [-7],
+      [-8],
+      [-9]
+    ]
+  }),
+
   board: computed(function() {
     var b =[];
     var i,j;
@@ -661,68 +717,13 @@ export default Controller.extend({
     } else{
       var moveObjectBX;
       var validArray = [];
-      var grid = {
-        'p': [
-          [7],
-          [8,16],
-          [9]
-        ],
-        'P': [
-          [-7],
-          [-8,-16],
-          [-9]
-        ],
-        'n': [
-          [17],
-          [15],
-          [10],
-          [6],
-          [-6],
-          [-10],
-          [-15],
-          [-17]
-        ],
-        'b': [
-          [9,18,27,36,45,54,63],
-          [7,14,21,28,35,42,49],
-          [-7,-14,-21,-28,-35,-42,-49],
-          [-9,-18,-27,-36,-45,-54,-63]
-        ],
-        'r': [
-          [8,16,24,32,40,48,56],
-          [1,2,3,4,5,6,7],
-          [-1,-2,-3,-4,-5,-6,-7],
-          [-8,-16,-24,-32,-40,-48,-56]
-        ],
-        'q': [
-          [9,18,27,36,45,54,63],
-          [7,14,21,28,35,42,49],
-          [-7,-14,-21,-28,-35,-42,-49],
-          [-9,-18,-27,-36,-45,-54,-63],
-
-          [8,16,24,32,40,48,56],
-          [1,2,3,4,5,6,7],
-          [-1,-2,-3,-4,-5,-6,-7],
-          [-8,-16,-24,-32,-40,-48,-56]
-        ],
-        'k': [
-          [9],
-          [8],
-          [7],
-          [1,2],
-          [-1,-2],
-          [-7],
-          [-8],
-          [-9]
-        ]
-      };
       var z;
       var moveObjectBLengthZ = moveObject.b.length;
       for(z = 0;  z < moveObjectBLengthZ; z++){
         if(moveObject.ToMove === 'b'){
           if(this.isBlack(moveObject.b[z])){
             moveObject.fromIndex = z;
-            var gridArray = grid[moveObject.b[z]];
+            var gridArray = this.grid[moveObject.b[z]];
             var gA;
             var gridArrayLength = gridArray.length;
             for(gA = 0; gA < gridArrayLength ; gA++){
@@ -744,11 +745,10 @@ export default Controller.extend({
           if(this.isWhite(moveObject.b[z])){
             var gridPiece = moveObject.b[z];
             if(gridPiece !== 'P'){
-              console.log('lololololololo')
               gridPiece = gridPiece.toLowerCase();
             }
             moveObject.fromIndex = z;
-            var gridArrayW = grid[gridPiece];
+            var gridArrayW = this.grid[gridPiece];
             var gAW;
             var gridArrayLengthW = gridArrayW.length;
             for(gAW = 0; gAW < gridArrayLengthW; gAW++){
@@ -862,7 +862,7 @@ export default Controller.extend({
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
           var minimaxMove = this.minimax(newMoveObject, 2, true, -1000000, 1000000);
           if(minimaxMove.points === -1000000){
-            console.log("zwart staat mat of pat");
+            console.log("x");
           } else{
             console.log(minimaxMove);
             var uci = minimaxMove.mv.split('');
