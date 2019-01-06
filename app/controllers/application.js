@@ -6,6 +6,22 @@ export default Controller.extend({
   queryParams: ['fen'],
   fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   move: '',
+  pointsHash: Object.freeze({
+    '1':0,
+    'p':100,
+    'n':300,
+    'b':300,
+    'r':500,
+    'q':900,
+    'k': 0,
+
+    'P':-100,
+    'N':-300,
+    'B':-300,
+    'R':-500,
+    'Q':-900,
+    'K': 0
+  }),
 
   board: computed(function() {
     var b =[];
@@ -48,13 +64,13 @@ export default Controller.extend({
         }
       }
     }
-    if(index !== 64){
-      var k;
-      b = [];
-      for( k = 0; k < 64; k++){
-        b[k] = 1;
-      }
-    }
+    // if(index !== 64){
+    //   var k;
+    //   b = [];
+    //   for( k = 0; k < 64; k++){
+    //     b[k] = 1;
+    //   }
+    // }
     return b;
   }),
 
@@ -508,7 +524,7 @@ export default Controller.extend({
     // nooit negatief
     var difX = Math.abs(fromX - toX);
     var difY = Math.abs(fromY - toY);
-    //neemt de hoogste waarde en daarna berekent de dif.
+    // neemt de hoogste waarde en daarna berekent de dif.
     var maxXY = Math.max(difX, difY);
     var difMove = toIndex - fromIndex;
     var step = difMove / maxXY;
@@ -623,28 +639,12 @@ export default Controller.extend({
 
   minimax(moveObject, depth, maximizingPlayer, alpha, beta){
     if(depth === 0){
-      var pointsHash = {
-        '1':0,
-        'p':100,
-        'n':300,
-        'b':300,
-        'r':500,
-        'q':900,
-        'k': 0,
-
-        'P':-100,
-        'N':-300,
-        'B':-300,
-        'R':-500,
-        'Q':-900,
-        'K': 0
-      };
       var points = 0;
       var c;
       var moveObjectBLengthC = moveObject.b.length;
       for(c = 0; c < moveObjectBLengthC; c++){
-        points = points + pointsHash[moveObject.b[c]];
-        if (pointsHash[moveObject.b[c]]){
+        points = points + this.pointsHash[moveObject.b[c]];
+        if (this.pointsHash[moveObject.b[c]]){
           if(c === 27 || c === 28 ||c === 35 ||c === 36 ){
             if (this.isWhite(moveObject.b[c])) {
               points = points - 25;
@@ -771,86 +771,76 @@ export default Controller.extend({
       if(depth > 1){
         console.log(validArray.length + "<- ->" + depth);
       }
-      if(validArray.length !== 0){
-        if(maximizingPlayer){
-          var pointsMax = -1000000;
-          var mvMax = '';
-          var v;
-          var validArrayLength = validArray.length;
-          for(v = 0; v < validArrayLength; v++){
-            var arrayMoveMax = validArray[v];
-            var uciMax = arrayMoveMax.split('');
-            var resMax = [];
 
-            resMax[0] = uciMax[0] + uciMax[1];
-            resMax[1] = uciMax[2] + uciMax[3];
-            resMax[2] = uciMax[4];
+      if(maximizingPlayer){
+        var pointsMax = -1000000;
+        var mvMax = '';
+        var v;
+        var validArrayLength = validArray.length;
+        for(v = 0; v < validArrayLength; v++){
+          var arrayMoveMax = validArray[v];
+          var uciMax = arrayMoveMax.split('');
+          var resMax = [];
 
-            moveObject.fromIndex = this.algebraicToIndex(resMax[0]);
-            moveObject.toIndex = this.algebraicToIndex(resMax[1]);
-            moveObject.mv = arrayMoveMax;
-            moveObjectBX = this.makeMove(moveObject);
-            var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
-            if(minimaxObjectMax.points > pointsMax){
-              pointsMax = minimaxObjectMax.points;
-              mvMax = arrayMoveMax;
-            }
-            if(minimaxObjectMax.points > alpha){
-              alpha = minimaxObjectMax.points;
-            }
-            if(alpha >= beta){
-              console.log("breakMax");
-              break;
-            }
+          resMax[0] = uciMax[0] + uciMax[1];
+          resMax[1] = uciMax[2] + uciMax[3];
+          resMax[2] = uciMax[4];
+
+          moveObject.fromIndex = this.algebraicToIndex(resMax[0]);
+          moveObject.toIndex = this.algebraicToIndex(resMax[1]);
+          moveObject.mv = arrayMoveMax;
+          moveObjectBX = this.makeMove(moveObject);
+          var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
+          if(minimaxObjectMax.points > pointsMax){
+            pointsMax = minimaxObjectMax.points;
+            mvMax = arrayMoveMax;
           }
-          return {
-            'mv':mvMax,
-            'points':pointsMax
-            }
-        } else{
-          var pointsMin = 1000000;
-          var mvMin = '';
-          var o;
-          var validArrayLengthO = validArray.length;
-          for(o = 0; o < validArrayLengthO; o++){
-            var arrayMoveMin = validArray[o];
-            var uciMin = arrayMoveMin.split('');
-            var resMin = [];
-
-            resMin[0] = uciMin[0] + uciMin[1];
-            resMin[1] = uciMin[2] + uciMin[3];
-            resMin[2] = uciMin[4];
-
-            moveObject.fromIndex = this.algebraicToIndex(resMin[0]);
-            moveObject.toIndex = this.algebraicToIndex(resMin[1]);
-            moveObject.mv = arrayMoveMin;
-            moveObjectBX = this.makeMove(moveObject);
-            var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
-            if(minimaxObjectMin.points < pointsMin){
-              pointsMin = minimaxObjectMin.points;
-              mvMin = arrayMoveMin;
-            }
-            if(minimaxObjectMin.points < beta){
-              beta = minimaxObjectMin.points;
-            }
-            if(alpha >= beta){
-              console.log("breakMin");
-              break;
-            }
+          if(minimaxObjectMax.points > alpha){
+            alpha = minimaxObjectMax.points;
           }
-          return {
-            'mv':mvMin,
-            'points':pointsMin
-            }
-        }
-      } else{
-        var p = -1000000;
-        if(maximizingPlayer){
-          p = 1000000;
+          if(alpha >= beta){
+            console.log("breakMax");
+            break;
+          }
         }
         return {
-          'mv':moveObject.mv,
-          'points': p
+          'mv':mvMax,
+          'points':pointsMax
+          }
+      } else{
+        var pointsMin = 1000000;
+        var mvMin = '';
+        var o;
+        var validArrayLengthO = validArray.length;
+        for(o = 0; o < validArrayLengthO; o++){
+          var arrayMoveMin = validArray[o];
+          var uciMin = arrayMoveMin.split('');
+          var resMin = [];
+
+          resMin[0] = uciMin[0] + uciMin[1];
+          resMin[1] = uciMin[2] + uciMin[3];
+          resMin[2] = uciMin[4];
+
+          moveObject.fromIndex = this.algebraicToIndex(resMin[0]);
+          moveObject.toIndex = this.algebraicToIndex(resMin[1]);
+          moveObject.mv = arrayMoveMin;
+          moveObjectBX = this.makeMove(moveObject);
+          var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
+          if(minimaxObjectMin.points < pointsMin){
+            pointsMin = minimaxObjectMin.points;
+            mvMin = arrayMoveMin;
+          }
+          if(minimaxObjectMin.points < beta){
+            beta = minimaxObjectMin.points;
+          }
+          if(alpha >= beta){
+            console.log("breakMin");
+            break;
+          }
+        }
+        return {
+          'mv':mvMin,
+          'points':pointsMin
           }
       }
     }
@@ -871,8 +861,8 @@ export default Controller.extend({
           var b = get(this,'boardArray').toArray();
           var newMoveObject = this.mvToMoveObject(fi, mv, b);
           var minimaxMove = this.minimax(newMoveObject, 2, true, -1000000, 1000000);
-          if(minimaxMove.points === -1000000 || minimaxMove.points === 1000000){
-            console.log("mat of pat");
+          if(minimaxMove.points === -1000000){
+            console.log("zwart staat mat of pat");
           } else{
             console.log(minimaxMove);
             var uci = minimaxMove.mv.split('');
