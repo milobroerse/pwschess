@@ -81,7 +81,7 @@ var F=this.minimax(l,t-1,!0,n,r)
 if(F.points<N&&(N=F.points,q=z),F.points<r&&(r=F.points),n>=r){console.log("breakMin")
 break}}return{mv:q,points:N}},actions:{playMove:function(){var e=this,t=Ember.get(this,"move"),i=JSON.parse(JSON.stringify(Ember.get(this,"fenInfo"))),n=Ember.get(this,"boardArray").toArray(),r=this.mvToMoveObject(i,t,n)
 if(this.checkValid(r)){var a=this.makeMove(r)
-Ember.set(this,"fen",a.Fen),Ember.run.later(function(){var t=Ember.get(e,"move"),i=JSON.parse(JSON.stringify(Ember.get(e,"fenInfo"))),n=Ember.get(e,"boardArray").toArray(),r=e.mvToMoveObject(i,t,n),a=e.minimax(r,2,!0,-1e6,1e6)
+Ember.set(this,"fen",a.Fen),Ember.run.later(function(){var t=Ember.get(e,"move"),i=JSON.parse(JSON.stringify(Ember.get(e,"fenInfo"))),n=Ember.get(e,"boardArray").toArray(),r=e.mvToMoveObject(i,t,n),a=e.minimax(r,4,!0,-1e6,1e6)
 if(-1e6===a.points)console.log("x")
 else{console.log(a)
 var s=a.mv.split(""),o=[]
