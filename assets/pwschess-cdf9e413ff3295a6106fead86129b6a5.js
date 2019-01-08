@@ -17,8 +17,8 @@ return n=n.replace(/-/g,""),{FenTrue:!0,Fen:t,ToMove:i[0],CastlingWk:i[1].includ
 if(this.checkMove(e).valid){t=!0
 var i=this.makeMove(e),n=!1
 if("w"===i.ToMove){var r,a=i.b.length
-for(r=0;r<a;r++)"k"===i.b[r]&&(i.toIndex=r,n=!0)
-if(n){var s,o=i.b.length
+for(r=0;r<a;r++)if("k"===i.b[r]){i.toIndex=r,n=!0
+break}if(n){var s,o=i.b.length
 for(s=0;s<o;s++)if(this.isWhite(i.b[s])){i.fromIndex=s
 var l=this.checkMove(i)
 l.valid&&(t=!1),i.CastlingCheck&&(2===i.toIndex?l.toIndex=3:l.toIndex=5,l.valid=!0,(l=this.checkMove(l)).valid&&(t=!1),l.toIndex=4,l.valid=!0,(l=this.checkMove(l)).valid&&(t=!1))}}}else{var c,f=i.b.length
@@ -69,7 +69,7 @@ for(m=0;m<b&&(e.toIndex=c+v[m],e.valid=!0,this.checkValid(e));m++)f.push(this.in
 "P"!==g&&(g=g.toLowerCase()),e.fromIndex=c
 var x,y=this.grid[g],k=y.length
 for(x=0;x<k;x++){var E,M=y[x],I=M.length
-for(E=0;E<I&&(e.toIndex=c+M[E],e.valid=!0,this.checkValid(e));E++)f.push(this.indexToAlgebraic(e.fromIndex)+this.indexToAlgebraic(e.toIndex))}}if(t>1&&console.log(f.length+"<- ->"+t),i){var P,w=-1e6,O="",C=f.length
+for(E=0;E<I&&(e.toIndex=c+M[E],e.valid=!0,this.checkValid(e));E++)f.push(this.indexToAlgebraic(e.fromIndex)+this.indexToAlgebraic(e.toIndex))}}if(i){var P,w=-1e6,O="",C=f.length
 for(P=0;P<C;P++){var T=f[P],_=T.split(""),A=[]
 A[0]=_[0]+_[1],A[1]=_[2]+_[3],A[2]=_[4],e.fromIndex=this.algebraicToIndex(A[0]),e.toIndex=this.algebraicToIndex(A[1]),e.mv=T,l=this.makeMove(e)
 var B=this.minimax(l,t-1,!1,n,r)
