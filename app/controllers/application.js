@@ -1,4 +1,4 @@
-import Controller from '@ember/controller';
+   import Controller from '@ember/controller';
 import { computed, get, set} from '@ember/object';
 import { later } from '@ember/runloop';
 
@@ -6,6 +6,9 @@ export default Controller.extend({
   queryParams: ['fen'],
   fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
   move: '',
+  lastPosWK: 64,
+  lastPosBK: 64,
+
   pointsHash: Object.freeze({
     '1':0,
     'p':100,
@@ -80,11 +83,12 @@ export default Controller.extend({
   }),
 
   board: computed(function() {
-    var b =[];
-    var i,j;
+    let b =[];
+    let i;
+    let j;
 
-    for( i = 0; i < 4; i++){
-      for( j = 0; j < 4; j++){
+    for(i = 0; i < 4; i++){
+      for(j = 0; j < 4; j++){
         b.push('tile white');
         b.push('tile black');
       }
@@ -97,55 +101,55 @@ export default Controller.extend({
   }),
 
   boardArray: computed('fen', function(){
-    var fen = get(this,'fen').toString();
-    var b = [];
+    let fen = get(this,'fen').toString();
+    let b = [];
 
     fen = fen.replace(/ .+$/,'');
     fen = fen.replace(/\//g,'');
 
-    var i;
-    var index = 0;
-    var fenLength = fen.length;
+    let i;
+    let index = 0;
+    let fenLength = fen.length;
     for(i = 0; i < fenLength; i++){
-      var f = fen[i];
+      let f = fen[i];
       if(isNaN(f)){
         b[index] = f;
         index++;
       } else{
-        var j;
-        var number = Number(f);
+        let j;
+        let number = Number(f);
         for(j = 0; j < number; j++){
           b[index] = 1;
           index++;
         }
       }
     }
-    // if(index !== 64){
-    //   var k;
-    //   b = [];
-    //   for( k = 0; k < 64; k++){
-    //     b[k] = 1;
-    //   }
-    // }
+    if(index !== 64){
+      let k;
+      b = [];
+      for(k = 0; k < 64; k++){
+        b[k] = 1;
+      }
+    }
     return b;
   }),
 
   validMove: computed('move', 'boardArray', 'fenInfo',function(){
-    var mv = get(this,'move');
-    var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
-    var b =  get(this,'boardArray').toArray();
-    var moveObject = this.mvToMoveObject(fi, mv, b);
+    let mv = get(this,'move');
+    let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
+    let b =  get(this,'boardArray').toArray();
+    let moveObject = this.mvToMoveObject(fi, mv, b);
 
     return this.checkValid(moveObject);
   }),
 
   tiles: computed('board', 'boardArray', function() {
-    var b = get(this,'board').toArray();
-    var boardArray = get(this,'boardArray').toArray();
-    var i;
+    let b = get(this,'board').toArray();
+    let boardArray = get(this,'boardArray').toArray();
+    let i;
 
-    for( i = 0; i < boardArray.length; i++){
-      var f = boardArray[i];
+    for(i = 0; i < boardArray.length; i++){
+      let f = boardArray[i];
       if(f !== 1){
         b[i] = b[i] + ' '  + this.fenToMbn(f);
       }
@@ -155,14 +159,14 @@ export default Controller.extend({
 
   fenInfo: computed('fen', function() {
     console.log('fenInfo');
-    var fen = get(this,'fen').toString();
+    let fen = get(this,'fen').toString();
     if(fen){
-      var orgFen = fen;
+      let orgFen = fen;
       fen = fen.replace(/^.+? /,'');
-      var res = fen.split(" ");
+      let res = fen.split(" ");
 
       if(res.length == 5){
-        var EnPassant = res[2];
+        let EnPassant = res[2];
         EnPassant = EnPassant.replace(/-/g,'');
         return {FenTrue: true, Fen: orgFen, ToMove: res[0], CastlingWk: res[1].includes("K"), CastlingWq: res[1].includes("Q"),  CastlingBk: res[1].includes("k"),  CastlingBq: res[1].includes("q"), EnPassant: EnPassant};
       }
@@ -171,29 +175,34 @@ export default Controller.extend({
   }),
 
   checkValid(moveObject){
-    var valid = false;
-    var newMoveObject = this.checkMove(moveObject);
-
+    let valid = false;
+    let newMoveObject = this.checkMove(moveObject);
     if(newMoveObject.valid){
       valid = true;
-      var afterMoveObject = this.makeMove(moveObject);
-      var kf = false;
+      let afterMoveObject = this.makeMove(moveObject);
+      let kf = false;
       if(afterMoveObject.ToMove === 'w'){
-        var i;
-        var afterMoveObjectBLengthI = afterMoveObject.b.length;
-        for(i = 0;  i < afterMoveObjectBLengthI; i++){
-          if(afterMoveObject.b[i] === 'k'){
-            afterMoveObject.toIndex = i;
+        if(afterMoveObject.b[this.lastPosBK] !== 'k');
+          let i;
+          let afterMoveObjectBLengthI = afterMoveObject.b.length;
+          for(i = 0;  i < afterMoveObjectBLengthI; i++){
+            if(afterMoveObject.b[i] === 'k'){
+              afterMoveObject.toIndex = i;
+              this.lastPosBK = i;
+              kf = true;
+              break;
+          } else{
+            afterMoveObject.toIndex = this.lastPosBK;
             kf = true;
           }
         }
         if(kf){
-          var j;
-          var afterMoveObjectBLengthJ = afterMoveObject.b.length;
+          let j;
+          let afterMoveObjectBLengthJ = afterMoveObject.b.length;
           for(j = 0;  j < afterMoveObjectBLengthJ; j++){
             if(this.isWhite(afterMoveObject.b[j])){
               afterMoveObject.fromIndex = j;
-              var fromNewMoveObjectW = this.checkMove(afterMoveObject);
+              let fromNewMoveObjectW = this.checkMove(afterMoveObject);
               if(fromNewMoveObjectW.valid){
                 valid = false;
               }
@@ -219,21 +228,27 @@ export default Controller.extend({
           }
         }
       } else{
-        var p;
-        var afterMoveObjectBLengthP = afterMoveObject.b.length;
-        for( p = 0;  p < afterMoveObjectBLengthP; p++){
-          if(afterMoveObject.b[p] === 'K'){
-            afterMoveObject.toIndex = p;
-            kf = true;
+        if(afterMoveObject.b[this.lastPosWK] !== 'K'){
+          let p;
+          let afterMoveObjectBLengthP = afterMoveObject.b.length;
+          for( p = 0;  p < afterMoveObjectBLengthP; p++){
+            if(afterMoveObject.b[p] === 'K'){
+              afterMoveObject.toIndex = p;
+              this.lastPosWK = p;
+              kf = true;
+            }
           }
+        } else{
+          afterMoveObject.toIndex = this.lastPosWK;
+          kf = true;
         }
         if(kf){
-          var u;
-          var afterMoveObjectBLengthU = afterMoveObject.b.length;
+          let u;
+          let afterMoveObjectBLengthU = afterMoveObject.b.length;
           for(u = 0;  u < afterMoveObjectBLengthU; u++){
             if(this.isBlack(afterMoveObject.b[u])){
               afterMoveObject.fromIndex = u;
-              var fromNewMoveObjectB = this.checkMove(afterMoveObject);
+              let fromNewMoveObjectB = this.checkMove(afterMoveObject);
               if(fromNewMoveObjectB.valid){
                 valid = false;
               }
@@ -266,19 +281,19 @@ export default Controller.extend({
   },
 
   checkMove(moveObject){
-    var valid = false;
-    var mo = JSON.parse(JSON.stringify(moveObject));
+    let valid = false;
+    let mo = JSON.parse(JSON.stringify(moveObject));
     if(mo.valid) {
-      var fromIndex = mo.fromIndex;
-      var toIndex = mo.toIndex;
-      var piecePromotion = mo.piecePromotion;
-      var b = mo.b;
-      var uci = [];
+      let fromIndex = mo.fromIndex;
+      let toIndex = mo.toIndex;
+      let piecePromotion = mo.piecePromotion;
+      let b = mo.b;
+      let uci = [];
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
-      var piece = b[fromIndex];
+      let piece = b[fromIndex];
       if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
         mo.valid = false;
         return mo
@@ -418,11 +433,11 @@ export default Controller.extend({
     return mo;
   },
   makeMove(moveObject){
-    var mo = JSON.parse(JSON.stringify(moveObject));
-    var fen = mo.Fen;
+    let mo = JSON.parse(JSON.stringify(moveObject));
+    let fen = mo.Fen;
     if(fen){
       //fen--->b
-      var info = fen;
+      let info = fen;
       fen = fen.replace(/ .+$/,'');
       fen = fen.replace(/\//g,'');
       info = info.replace(/^.+? /,'');
@@ -439,12 +454,12 @@ export default Controller.extend({
       var toIndex = mo.toIndex;
       var piecePromotion = mo.piecePromotion;
       var b = mo.b;
-      var uci = [];
+      let uci = [];
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
       uci[2] = (toIndex % 8) + 1;
       uci[3] = 8 - (Math.floor(toIndex / 8));
-      var piece = b[fromIndex];
+      let piece = b[fromIndex];
       b[fromIndex] = 1;
       b[toIndex] = piece;
       //CastlingWhite
@@ -535,11 +550,13 @@ export default Controller.extend({
       }
       //b--->fen
       var newfen = '';
-      var loopCount = 0;
-      for(var i = 0; i < 8; i++){
-        var tempNumber = 0;
-        for(var p = 0; p < 8; p++){
-          var x = b[loopCount];
+      let loopCount = 0;
+      let i;
+      for(i = 0; i < 8; i++){
+        let tempNumber = 0;
+        let p;
+        for(p = 0; p < 8; p++){
+          let x = b[loopCount];
           loopCount++;
           if(isNaN(x)){
             if(tempNumber){
@@ -560,7 +577,7 @@ export default Controller.extend({
       }
       newfen = newfen + ' ' + extra.join(' ');
     }
-    var EnPassant = extra[2];
+    let EnPassant = extra[2];
     EnPassant = EnPassant.replace(/-/g,'');
     mo.b = b;
     mo.Fen = newfen;
@@ -572,18 +589,18 @@ export default Controller.extend({
     return mo;
   },
   lineCheck(fromIndex, toIndex, b, piece){
-    var valid = true;
-    var fromX = fromIndex % 8;
-    var fromY = Math.floor(fromIndex / 8);
-    var toX = toIndex % 8;
-    var toY = Math.floor(toIndex / 8);
+    let valid = true;
+    let fromX = fromIndex % 8;
+    let fromY = Math.floor(fromIndex / 8);
+    let toX = toIndex % 8;
+    let toY = Math.floor(toIndex / 8);
     // nooit negatief
-    var difX = Math.abs(fromX - toX);
-    var difY = Math.abs(fromY - toY);
+    let difX = Math.abs(fromX - toX);
+    let difY = Math.abs(fromY - toY);
     // neemt de hoogste waarde en daarna berekent de dif.
-    var maxXY = Math.max(difX, difY);
-    var difMove = toIndex - fromIndex;
-    var step = difMove / maxXY;
+    let maxXY = Math.max(difX, difY);
+    let difMove = toIndex - fromIndex;
+    let step = difMove / maxXY;
     if(piece === 'Q' || piece === 'q'){
       if(difX !== 0 && difY !== 0 && difX !== difY){
         return false;
@@ -609,7 +626,7 @@ export default Controller.extend({
         return false;
       }
     }
-    var j;
+    let j;
     for(j = fromIndex + step; j !== toIndex; j += step){
       if(!this.isEmpty(b[j])){
         valid = false;
@@ -622,7 +639,7 @@ export default Controller.extend({
   },
 
   isBlack(piece){
-    if(piece === 'p' || piece === 'n' || piece === 'b'|| piece === 'r'|| piece === 'q'|| piece === 'k'){
+    if(piece === 'p' || piece === 'n' || piece === 'b' || piece === 'r' || piece === 'q' || piece === 'k'){
       return true;
     } else{
       return false;
@@ -633,7 +650,7 @@ export default Controller.extend({
   },
 
   isWhite(piece){
-    if(piece === 'P' || piece === 'N' || piece === 'B'|| piece === 'R'|| piece === 'Q'|| piece === 'K'){
+    if(piece === 'P' || piece === 'N' || piece === 'B' || piece === 'R' || piece === 'Q' || piece === 'K'){
       return true;
     } else{
       return false;
@@ -646,7 +663,7 @@ export default Controller.extend({
      return uci.toLowerCase().charCodeAt(0) - 96;
   },
   fenToMbn(fen){
-    var code = fen.toLowerCase();
+    let code = fen.toLowerCase();
     if(code === fen){
       return 'b' + code;
     } else{
@@ -654,29 +671,29 @@ export default Controller.extend({
     }
   },
   algebraicToIndex(alg){
-    var piece = alg.split("");
+    let piece = alg.split("");
     if (piece.length === 2){
-      var x = this.uciToNumber(piece[0]);
-      var y = piece[1];
-      var index = (8-y)*8+x-1;
+      let x = this.uciToNumber(piece[0]);
+      let y = piece[1];
+      let index = (8 - y) * 8 + x-1;
       return(index);
     } else{
       return -1;
     }
   },
   indexToAlgebraic(index){
-    var t = (index % 8) + 1 ;
-    var y = 8 - (Math.floor(index / 8));
-    var x = String.fromCharCode(t + 96);
+    let t = (index % 8) + 1 ;
+    let y = 8 - (Math.floor(index / 8));
+    let x = String.fromCharCode(t + 96);
     return(x+y);
   },
   mvToMoveObject(fenInfo, mv, b){
-    var mo = JSON.parse(JSON.stringify(fenInfo));
-    var valid = false;
+    let mo = JSON.parse(JSON.stringify(fenInfo));
+    let valid = false;
     if(mv && mv.length > 3 && mv.length < 6){
       valid = true;
-      var uci = mv.split('');
-      var res = [];
+      let uci = mv.split('');
+      let res = [];
 
       res[0] = uci[0] + uci[1];
       res[1] = uci[2] + uci[3];
@@ -696,13 +713,13 @@ export default Controller.extend({
   minimax(moveObject, depth, maximizingPlayer, alpha, beta){
     if(depth === 0){
       var points = 0;
-      var c;
-      var moveObjectBLengthC = moveObject.b.length;
+      let c;
+      let moveObjectBLengthC = moveObject.b.length;
       for(c = 0; c < moveObjectBLengthC; c++){
         points = points + this.pointsHash[moveObject.b[c]];
         if (this.pointsHash[moveObject.b[c]]){
-          if(c === 27 || c === 28 ||c === 35 ||c === 36 ){
-            if (this.isWhite(moveObject.b[c])) {
+          if(c === 27 || c === 28 || c === 35 || c === 36 ){
+            if(this.isWhite(moveObject.b[c])) {
               points = points - 25;
             } else {
               points = points + 25;
@@ -715,72 +732,77 @@ export default Controller.extend({
         'points': points
         }
     } else{
-      var moveObjectBX;
-      var validArray = [];
-      var z;
-      var moveObjectBLengthZ = moveObject.b.length;
+      let moveObjectBX;
+      let validArray = [];
+      let z;
+      let moveObjectBLengthZ = moveObject.b.length;
       for(z = 0;  z < moveObjectBLengthZ; z++){
         if(moveObject.ToMove === 'b'){
           if(this.isBlack(moveObject.b[z])){
             moveObject.fromIndex = z;
-            var gridArray = this.grid[moveObject.b[z]];
-            var gA;
-            var gridArrayLength = gridArray.length;
+            let gridArray = this.grid[moveObject.b[z]];
+            let gA;
+            let gridArrayLength = gridArray.length;
             for(gA = 0; gA < gridArrayLength ; gA++){
-              var gridMove = gridArray[gA];
-              var gM;
-              var gridMoveLength = gridMove.length;
+              let gridMove = gridArray[gA];
+              let gM;
+              let gridMoveLength = gridMove.length;
               for(gM = 0; gM < gridMoveLength; gM++){
                 moveObject.toIndex = z + gridMove[gM];
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                 } else{
-                  break;
+                  if(moveObject.b[moveObject.toIndex] + '' !== '1'){
+                    break;
+                  }
                 }
               }
             }
           }
         } else{
           if(this.isWhite(moveObject.b[z])){
-            var gridPiece = moveObject.b[z];
+            let gridPiece = moveObject.b[z];
             if(gridPiece !== 'P'){
               gridPiece = gridPiece.toLowerCase();
             }
             moveObject.fromIndex = z;
-            var gridArrayW = this.grid[gridPiece];
-            var gAW;
-            var gridArrayLengthW = gridArrayW.length;
+            let gridArrayW = this.grid[gridPiece];
+            let gAW;
+            let gridArrayLengthW = gridArrayW.length;
             for(gAW = 0; gAW < gridArrayLengthW; gAW++){
-              var gridMoveW = gridArrayW[gAW];
-              var gMW;
-              var gridMoveLengthW = gridMoveW.length;
+              let gridMoveW = gridArrayW[gAW];
+              let gMW;
+              let gridMoveLengthW = gridMoveW.length;
               for(gMW = 0; gMW < gridMoveLengthW; gMW++){
                 moveObject.toIndex = z + gridMoveW[gMW];
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                 } else{
-                  break;
+                  if(moveObject.b[moveObject.toIndex] + '' !== '1'){
+                    break;
+                  }
                 }
               }
             }
           }
         }
       }
-      if(depth > 1){
-        console.log(validArray.length + "<- ->" + depth);
-      }
+      // if(depth === 1){
+      //   console.log(validArray.length + "<- ->" + depth);
+      // }
 
       if(maximizingPlayer){
         var pointsMax = -1000000;
         var mvMax = '';
-        var v;
-        var validArrayLength = validArray.length;
+        let v;
+//console.log(validArray + 'A');
+        let validArrayLength = validArray.length;
         for(v = 0; v < validArrayLength; v++){
-          var arrayMoveMax = validArray[v];
-          var uciMax = arrayMoveMax.split('');
-          var resMax = [];
+          let arrayMoveMax = validArray[v];
+          let uciMax = arrayMoveMax.split('');
+          let resMax = [];
 
           resMax[0] = uciMax[0] + uciMax[1];
           resMax[1] = uciMax[2] + uciMax[3];
@@ -790,7 +812,7 @@ export default Controller.extend({
           moveObject.toIndex = this.algebraicToIndex(resMax[1]);
           moveObject.mv = arrayMoveMax;
           moveObjectBX = this.makeMove(moveObject);
-          var minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
+          let minimaxObjectMax = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
           if(minimaxObjectMax.points > pointsMax){
             pointsMax = minimaxObjectMax.points;
             mvMax = arrayMoveMax;
@@ -810,12 +832,13 @@ export default Controller.extend({
       } else{
         var pointsMin = 1000000;
         var mvMin = '';
-        var o;
-        var validArrayLengthO = validArray.length;
+        let o;
+    //    console.log(validArray + 'B');
+        let validArrayLengthO = validArray.length;
         for(o = 0; o < validArrayLengthO; o++){
-          var arrayMoveMin = validArray[o];
-          var uciMin = arrayMoveMin.split('');
-          var resMin = [];
+          let arrayMoveMin = validArray[o];
+          let uciMin = arrayMoveMin.split('');
+          let resMin = [];
 
           resMin[0] = uciMin[0] + uciMin[1];
           resMin[1] = uciMin[2] + uciMin[3];
@@ -825,7 +848,7 @@ export default Controller.extend({
           moveObject.toIndex = this.algebraicToIndex(resMin[1]);
           moveObject.mv = arrayMoveMin;
           moveObjectBX = this.makeMove(moveObject);
-          var minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
+          let minimaxObjectMin = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
           if(minimaxObjectMin.points < pointsMin){
             pointsMin = minimaxObjectMin.points;
             mvMin = arrayMoveMin;
@@ -847,32 +870,32 @@ export default Controller.extend({
   },
   actions: {
     playMove() {
-      var mv = get(this,'move');
-      var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
-      var b =  get(this,'boardArray').toArray();
-      var moveObject = this.mvToMoveObject(fi, mv, b);
+      let mv = get(this,'move');
+      let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
+      let b =  get(this,'boardArray').toArray();
+      let moveObject = this.mvToMoveObject(fi, mv, b);
       if(this.checkValid(moveObject)){
-        var newMoveObject = this.makeMove(moveObject);
+        let newMoveObject = this.makeMove(moveObject);
         set(this, 'fen', newMoveObject.Fen);
         // Ember Run Later
         later(()=>{
-          var mv = get(this,'move');
-          var fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
-          var b = get(this,'boardArray').toArray();
-          var newMoveObject = this.mvToMoveObject(fi, mv, b);
-          var minimaxMove = this.minimax(newMoveObject, 2, true, -1000000, 1000000);
+          let mv = get(this,'move');
+          let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
+          let b = get(this,'boardArray').toArray();
+          let newMoveObject = this.mvToMoveObject(fi, mv, b);
+          let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
           if(minimaxMove.points === -1000000){
             console.log("x");
           } else{
             console.log(minimaxMove);
-            var uci = minimaxMove.mv.split('');
-            var res = [];
+            let uci = minimaxMove.mv.split('');
+            let res = [];
             res[0] = uci[0] + uci[1];
             res[1] = uci[2] + uci[3];
             res[2] = uci[4];
             newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
             newMoveObject.toIndex = this.algebraicToIndex(res[1]);
-            var newMoveObjectBX = this.makeMove(newMoveObject);
+            let newMoveObjectBX = this.makeMove(newMoveObject);
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
           }
