@@ -785,9 +785,7 @@ export default Controller.extend({
             let gridPiece = moveObject.b[z];
             let promotionFlag = false;
             moveObject.fromIndex = z;
-            console.log(gridPiece ,z);
             if(moveObject.fromIndex > 47 && moveObject.fromIndex < 56 && gridPiece === 'p'){
-              console.log('xx');
               promotionFlag = true;
             }
             let gridArray = this.grid[gridPiece];
@@ -807,7 +805,6 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    console.log('black kip');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
@@ -852,7 +849,6 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    console.log('white kip');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
@@ -887,9 +883,7 @@ export default Controller.extend({
           moveObject.fromIndex = this.algebraicToIndex(resMax[0]);
           moveObject.toIndex = this.algebraicToIndex(resMax[1]);
           moveObject.mv = arrayMoveMax;
-          console.log(arrayMoveMax);
           if(resMax[2]){
-            console.log(resMax[2] + 'w');
             moveObject.piecePromotion = resMax[2];
           } else{
             moveObject.piecePromotion = '';
@@ -927,9 +921,7 @@ export default Controller.extend({
 
           moveObject.fromIndex = this.algebraicToIndex(resMin[0]);
           moveObject.toIndex = this.algebraicToIndex(resMin[1]);
-        //  console.log(arrayMoveMin);
           if(resMin[2]){
-            console.log(resMin[2] + 'b');
             moveObject.piecePromotion = resMin[2];
           } else{
             moveObject.piecePromotion = '';
@@ -982,6 +974,11 @@ export default Controller.extend({
             res[2] = uci[4];
             newMoveObject.fromIndex = this.algebraicToIndex(res[0]);
             newMoveObject.toIndex = this.algebraicToIndex(res[1]);
+            if(res[2]){
+              newMoveObject.piecePromotion = res[2];
+            } else{
+              newMoveObject.piecePromotion = '';
+            }
             let newMoveObjectBX = this.makeMove(newMoveObject);
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
