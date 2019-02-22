@@ -1,25 +1,30 @@
 .valid{
      background-color: red;
 }
-
+.form-control {
+  width: 100%;
+}
 .row {
     display: flex;
 }
 
 .column1 {
-    flex: 25%;
+  margin: 10px;
+  width: 420px;
 }
 .column2 {
+    margin: 10px;
+    width: 420px;
 }
 .column3 {
-    flex: 25%;
-    text-align: right;
+    margin: 10px;
+
+
 }
 
 .board{
     border: 10px solid gray;
     height: 400px;
-    margin-left: auto;
     margin-right: auto;
     width: 400px;
 }
@@ -29,6 +34,31 @@
     height: 50px;
     width: 50px;
 }
+
+@media only screen and (max-width: 1100px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .column1 {
+    width: 280px;
+  }
+  .column2 {
+      width: 280px;
+  }
+  .board{
+      height: 280px;
+      width: 280px;
+  }
+  .tile{
+      height: 35px;
+      width: 35px;
+  }
+}
+
+
 
 .black{
     background-color: #4B9B99;
