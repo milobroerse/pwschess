@@ -1,10 +1,11 @@
-<div class="row">
+<div class="container-fluid">
+<div class = "row">
 
 <div class = "column1">
-{{input type="text" value=fen placeholder="Vul hier een FEN in" size=60}} <br/>
+{{input type="text" value=fen placeholder="Vul hier een FEN in" class="form-control"}} <br/>
 <br/>
 
-{{input class = (unless validMove 'valid') type="text" value=move placeholder="" size=30}}
+{{input class = (unless validMove 'valid') type="text" value=move placeholder=""}}
 <button {{action "playMove"}}>Move</button>
 </div>
 
@@ -25,4 +26,5 @@
 {{/if}}
 </div>
 {{outlet}}
+</div>
 </div>
