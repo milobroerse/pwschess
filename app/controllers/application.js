@@ -832,51 +832,79 @@ export default Controller.extend({
           }
         }
       }
-      let points = 1111111;
       if(!validArray.length){
         if(maximizingPlayer){
-
-                  checkMateFlag = true;
-                    }
-                  }
-                }
-                if(checkMateFlag){
-                  console.log('mat');
-                  points = -1000000;
-                } else{
-                  console.log('pat')
-                  points = 0;
+          let kingPosition,i,j;
+          let checkMateFlag = false;
+          for(i = 0; i < moveObject.b.length; i++){
+            if(moveObject.b[i] === 'k'){
+              kingPosition = i;
             }
+          }
+          for(j = 0; j < moveObject.b.length; j++){
+            if(this.isWhite(moveObject.b[j])){
+              moveObject.fromIndex = j;
+              moveObject.toIndex = kingPosition;
+              moveObject.ToMove = 'w';
+              moveObject.valid = true;
+              if(this.checkValid(moveObject)){
+                console.log('heyaa');
+                checkMateFlag = true;
+                break;
+              }
+            }
+          }
+          if(checkMateFlag){
+            console.log('mat')
+            return {
+              'mv': '',
+              'points': -1000000
+              }
+          } else{
+            console.log('pat')
+            return {
+              'mv': '',
+              'points': 0
+              }
           }
         } else{
-          let kingPosition,k;
+          let kingPosition,i,j;
           let checkMateFlag = false;
-          for(k = 0; k < moveObject.b.length; k++){
-            if(moveObject.b[k] === 'K'){
-              kingPosition = k;
+          for(i = 0; i < moveObject.b.length; i++){
+            if(moveObject.b[i] === 'K'){
+              kingPosition = i;
             }
           }
-          let p;
-          for(p = 0; p < moveObject.b.length; p++){
-            if(this.isBlack(moveObject.b[p]) && !checkMateFlag){
-              moveObject.fromIndex = p;
+          for(j = 0; j < moveObject.b.length; j++){
+            if(this.isBlack(moveObject.b[j])){
+              moveObject.fromIndex = j;
               moveObject.toIndex = kingPosition;
               moveObject.ToMove = 'b';
+              moveObject.valid = true;
               if(this.checkValid(moveObject)){
+                console.log('hoi');
                 checkMateFlag = true;
-                  }
-                }
+                break;
               }
-              if(checkMateFlag){
-                console.log('mat')
-                points = 1000000
-              } else{
-                console.log('pat')
-                points = 0;
+            }
+          }
+          if(checkMateFlag){
+            console.log('mat')
+            return {
+              'mv': '',
+              'points': 1000000
+              }
+          } else{
+            console.log('pat')
+            return {
+              'mv': '',
+              'points': 0
+              }
           }
         }
-
+      }
       if(maximizingPlayer){
+        let points = -1000000;
         let mv = '';
         let i;
         let validArrayLength = validArray.length;
@@ -885,8 +913,8 @@ export default Controller.extend({
           let uci = arrayMove.split('');
           let res = [];
 
-          res[1] = uci[2] + uci[3];
           res[0] = uci[0] + uci[1];
+          res[1] = uci[2] + uci[3];
           res[2] = uci[4];
 
           moveObject.fromIndex = this.algebraicToIndex(res[0]);
