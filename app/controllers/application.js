@@ -832,8 +832,51 @@ export default Controller.extend({
           }
         }
       }
+      let points = 1111111;
+      if(!validArray.length){
+        if(maximizingPlayer){
+
+                  checkMateFlag = true;
+                    }
+                  }
+                }
+                if(checkMateFlag){
+                  console.log('mat');
+                  points = -1000000;
+                } else{
+                  console.log('pat')
+                  points = 0;
+            }
+          }
+        } else{
+          let kingPosition,k;
+          let checkMateFlag = false;
+          for(k = 0; k < moveObject.b.length; k++){
+            if(moveObject.b[k] === 'K'){
+              kingPosition = k;
+            }
+          }
+          let p;
+          for(p = 0; p < moveObject.b.length; p++){
+            if(this.isBlack(moveObject.b[p]) && !checkMateFlag){
+              moveObject.fromIndex = p;
+              moveObject.toIndex = kingPosition;
+              moveObject.ToMove = 'b';
+              if(this.checkValid(moveObject)){
+                checkMateFlag = true;
+                  }
+                }
+              }
+              if(checkMateFlag){
+                console.log('mat')
+                points = 1000000
+              } else{
+                console.log('pat')
+                points = 0;
+          }
+        }
+
       if(maximizingPlayer){
-        let points = -1000000;
         let mv = '';
         let i;
         let validArrayLength = validArray.length;
@@ -842,8 +885,8 @@ export default Controller.extend({
           let uci = arrayMove.split('');
           let res = [];
 
-          res[0] = uci[0] + uci[1];
           res[1] = uci[2] + uci[3];
+          res[0] = uci[0] + uci[1];
           res[2] = uci[4];
 
           moveObject.fromIndex = this.algebraicToIndex(res[0]);
