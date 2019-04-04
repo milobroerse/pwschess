@@ -305,133 +305,154 @@ export default Controller.extend({
       let piece = b[fromIndex];
       if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
         mo.valid = false;
-        return mo
+        return mo;
       }
       if(mo.ToMove === 'b' && this.isWhite(b[fromIndex])){
         mo.valid = false;
-        return mo
+        return mo;
       }
       if(uci[3] < 1 || uci[3] > 8){
         mo.valid = false;
-        return mo
+        return mo;
       }
       if(piece === 'P'){
-
-        // let gridArray = this.grid[piece];
-        // let i;
-        // let gridArrayLength = gridArray.length;
-        // for(i = 0; i < gridArrayLength ; i++){
-        //   let gridMove = gridArray[i];
-        //   let k;
-        //   let gridMoveLength = gridMove.length;
-        // }
-        if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
         if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex - 8])){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
-
+        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
+          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
+            mo.valid = true;
+            return mo;
+          }
+        }
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3] - uci[1] === 1) {
           valid = true;
         }
-
-        if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
-          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
-            valid = true;
-          }
+        if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
+          valid = true;
         }
-        if(uci[3] === 8 && valid === true){
-          valid = false;
+        if(valid === true && uci[3] === 8){
           if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
-            valid = true;
+            mo.valid = true;
+            return mo;
+          } else{
+            mo.valid = false;
+            return mo;
           }
+        } else{
+          mo.valid = valid;
+          return mo;
         }
+
       }
+
       if(piece === 'p'){
-        if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
-          valid = true;
-        }
         if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex + 8])){
-          valid = true;
+          mo.valid = true;
+          return mo;
+        }
+        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
+          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
+            mo.valid = true;
+            return mo;
+          }
         }
         if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3] - uci[1] === -1) {
           valid = true;
         }
-        if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
-          if(this.algebraicToIndex(mo.EnPassant) === toIndex){
+        if(toIndex - fromIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
-          }
         }
-        if(uci[3] == 1 && valid === true){
-          valid = false;
+        if(valid === true && uci[3] == 1){
           if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
-            valid = true;
+            mo.valid = true;
+            return mo;
+          } else{
+            mo.valid = false;
+            return mo;
           }
+        } else{
+          mo.valid = valid;
+          return mo;
         }
       }
       if(piece === 'N'){
         if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === 2){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === -2){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
       }
       if(piece === 'n'){
         if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === 2){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === -2){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
         if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
       }
       if(piece === 'K'){
         if(((toIndex === 58 && mo.CastlingWq) || (toIndex === 62 && mo.CastlingWk)) && fromIndex === 60){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            valid = true;
+            mo.valid = true;
+            return mo;
           }
         } else {
           if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-            valid = true;
+            mo.valid = true;
+            return mo;
           }
         }
       }
       if(piece === 'k'){
         if(((toIndex === 2 && mo.CastlingBq) || (toIndex === 6 && mo.CastlingBk)) && fromIndex === 4){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            valid = true;
+            mo.valid = true;
+            return mo;
           }
         } else {
           if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-            valid = true;
+            mo.valid = true;
+            return mo;
           }
         }
       }
       if(piece === 'Q' || piece === 'R' || piece === 'B'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
       }
       if(piece === 'q' || piece === 'r' || piece === 'b'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-          valid = true;
+          mo.valid = true;
+          return mo;
         }
       }
     }
-    mo.valid = valid;
+    mo.valid = false;
     return mo;
   },
   makeMove(moveObject){
@@ -1008,7 +1029,7 @@ export default Controller.extend({
       let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       let b =  get(this,'boardArray').toArray();
       let moveObject = this.mvToMoveObject(fi, mv, b);
-      console.log(moveObject);
+      // console.log(moveObject);
       if(this.checkValid(moveObject)){
         let newMoveObject = this.makeMove(moveObject);
         set(this, 'fen', newMoveObject.Fen);
