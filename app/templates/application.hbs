@@ -5,8 +5,10 @@
 {{input type="text" value=fen placeholder="Vul hier een FEN in" class="form-control"}} <br/>
 <br/>
 
-{{input class = (unless validMove 'valid') type="text" value=move placeholder=""}}
-<button {{action "playMove"}}>Move</button>
+<form {{action "playMove" on="submit"}}>
+    {{input class = (unless validMove 'valid') type="text" value=move placeholder=""}}
+    <button type="submit">Move</button>
+</form>
 </div>
 
 <div class="board column2" >

@@ -163,20 +163,20 @@ export default Controller.extend({
       fen = fen.replace(/^.+? /,'');
       let res = fen.split(" ");
 
-        if(res.length == 5){
-        let EnPassant = res[2];
-        EnPassant = EnPassant.replace(/-/g,'');
+      if(res.length == 5){
+      let EnPassant = res[2];
+      EnPassant = EnPassant.replace(/-/g,'');
 
-        return {
-          FenTrue: true,
-          Fen: orgFen,
-          ToMove: res[0],
-          CastlingWk: res[1].includes("K"),
-          CastlingWq: res[1].includes("Q"),
-          CastlingBk: res[1].includes("k"),
-          CastlingBq: res[1].includes("q"),
-          EnPassant: EnPassant
-        };
+      return {
+        FenTrue: true,
+        Fen: orgFen,
+        ToMove: res[0],
+        CastlingWk: res[1].includes("K"),
+        CastlingWq: res[1].includes("Q"),
+        CastlingBk: res[1].includes("k"),
+        CastlingBq: res[1].includes("q"),
+        EnPassant: EnPassant
+      };
       }
     }
     return {FenTrue: false};
@@ -316,15 +316,26 @@ export default Controller.extend({
         return mo
       }
       if(piece === 'P'){
+
+        // let gridArray = this.grid[piece];
+        // let i;
+        // let gridArrayLength = gridArray.length;
+        // for(i = 0; i < gridArrayLength ; i++){
+        //   let gridMove = gridArray[i];
+        //   let k;
+        //   let gridMoveLength = gridMove.length;
+        // }
         if(fromIndex - toIndex === 8 && this.isEmpty(b[toIndex])){
           valid = true;
         }
         if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex - 8])){
           valid = true;
         }
+
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3] - uci[1] === 1) {
           valid = true;
         }
+
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
           if(this.algebraicToIndex(mo.EnPassant) === toIndex){
             valid = true;
@@ -426,13 +437,16 @@ export default Controller.extend({
   makeMove(moveObject){
     let mo = JSON.parse(JSON.stringify(moveObject));
     let fen = mo.Fen;
+    let extra;
+    let fromIndex,toIndex,piecePromotion,b;
+    let newfen;
     if(fen){
       //fen--->b
       let info = fen;
       fen = fen.replace(/ .+$/,'');
       fen = fen.replace(/\//g,'');
       info = info.replace(/^.+? /,'');
-      var extra = info.split(" ");
+      extra = info.split(" ");
 
       if(extra[0].toLowerCase() === 'w'){
         extra[0] = 'b';
@@ -441,10 +455,10 @@ export default Controller.extend({
         extra[0] = 'w';
         mo.ToMove = 'w';
       }
-      var fromIndex = mo.fromIndex;
-      var toIndex = mo.toIndex;
-      var piecePromotion = mo.piecePromotion;
-      var b = mo.b;
+      fromIndex = mo.fromIndex;
+      toIndex = mo.toIndex;
+      piecePromotion = mo.piecePromotion;
+      b = mo.b;
       let uci = [];
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
@@ -537,7 +551,7 @@ export default Controller.extend({
         extra[1] = '-';
       }
       //b--->fen
-      var newfen = '';
+      newfen = '';
       let loopCount = 0;
       let i;
       for(i = 0; i < 8; i++){
@@ -705,16 +719,20 @@ export default Controller.extend({
     for(i = 0; i < moveObjectBLength; i++){
       points = points + this.pointsHash[moveObject.b[i]];
       if(this.pointsHash[moveObject.b[i]]){
-        if((i === 8 || i === 9 || i === 10 || i === 11 || i === 12 || i === 13 || i === 14 || i === 15) && (moveObject.b[i] === 'P')){
+        // a7 tot h7
+        if((i > 7 && i < 16) && (moveObject.b[i] === 'P')){
           points = points - 20;
         }
-        if((i === 16 || i === 17 || i === 18 || i === 19 || i === 20 || i === 21 || i === 14 || i === 15) && (moveObject.b[i] === 'P')){
+        // a6 tot h6
+        if((i > 15 && i < 24) && (moveObject.b[i] === 'P')){
           points = points - 10;
         }
-        if((i === 40 || i === 41 || i === 42 || i === 43 || i === 44 || i === 45 || i === 46 || i === 47) && (moveObject.b[i] === 'p')){
+        //a3 tot h3
+        if((i > 39 && i < 48) && (moveObject.b[i] === 'p')){
           points = points + 10;
         }
-        if((i === 48 || i === 49 || i === 50 || i === 51 || i === 52 || i === 53 || i === 54 || i === 55) && (moveObject.b[i] === 'p')){
+        //a2 tot h2
+        if((i > 47 && i < 56) && (moveObject.b[i] === 'p')){
           points = points + 20;
         }
         if(
@@ -741,9 +759,8 @@ export default Controller.extend({
         'points': points
         }
     } else{
-      let moveObjectBX;
-      let validArray = [];
       let i;
+      let validArray = [];
       let moveObjectBLength = moveObject.b.length;
       for(i = 0;  i < moveObjectBLength; i++){
         if(moveObject.ToMove === 'b'){
@@ -903,6 +920,7 @@ export default Controller.extend({
           }
         }
       }
+      let moveObjectBX
       if(maximizingPlayer){
         let points = -1000000;
         let mv = '';
@@ -990,6 +1008,7 @@ export default Controller.extend({
       let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       let b =  get(this,'boardArray').toArray();
       let moveObject = this.mvToMoveObject(fi, mv, b);
+      console.log(moveObject);
       if(this.checkValid(moveObject)){
         let newMoveObject = this.makeMove(moveObject);
         set(this, 'fen', newMoveObject.Fen);
