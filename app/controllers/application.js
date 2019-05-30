@@ -146,14 +146,17 @@ export default Controller.extend({
     let b = get(this,'board').toArray();
     let boardArray = get(this,'boardArray').toArray();
     let i;
+    let tiles = [];
 
     for(i = 0; i < boardArray.length; i++){
       let f = boardArray[i];
       if(f !== 1){
-        b[i] = b[i] + ' '  + this.fenToMbn(f);
+        tiles[i] = {class: b[i] + ' '  + this.fenToMbn(f), index: i};
+      } else{
+        tiles[i] = {class: b[i], index: i};
       }
     }
-    return b;
+    return tiles;
   }),
 
   fenInfo: computed('fen', function() {
@@ -975,8 +978,17 @@ export default Controller.extend({
     }
   },
   actions: {
-    playMove() {
+    playMove(index){
       let mv = get(this,'move');
+      let alg = this.indexToAlgebraic(index);
+      if(alg){
+        if(mv.length > 2){
+          mv = '';
+          alg = '';
+        }
+        mv += alg;
+        set(this,'move',mv);
+      }
       let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       let b =  get(this,'boardArray').toArray();
       let moveObject = this.mvToMoveObject(fi, mv, b);
