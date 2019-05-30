@@ -83,7 +83,7 @@ export default Controller.extend({
   }),
 
   board: computed(function() {
-    let b =[];
+    let b = [];
     let i,j;
 
     for(i = 0; i < 4; i++){
@@ -183,17 +183,14 @@ export default Controller.extend({
   }),
 
   checkValid(moveObject){
-    let valid = false;
-    let newMoveObject = this.checkMove(moveObject);
-    if(newMoveObject.valid){
-      valid = true;
+    let valid = this.checkMove(moveObject, moveObject.fromIndex, moveObject.toIndex);
+    if(valid){
       let afterMoveObject = this.makeMove(moveObject);
       let kf = false;
-
       if(afterMoveObject.ToMove === 'w'){
+        let afterMoveObjectBLength = afterMoveObject.b.length;
         if(afterMoveObject.b[this.lastPosBK] !== 'k');
           let i;
-          let afterMoveObjectBLength = afterMoveObject.b.length;
           for(i = 0; i < afterMoveObjectBLength; i++){
             if(afterMoveObject.b[i] === 'k'){
               afterMoveObject.toIndex = i;
@@ -207,29 +204,23 @@ export default Controller.extend({
         }
         if(kf){
           let i;
-          let afterMoveObjectBLength = afterMoveObject.b.length;
           for(i = 0; i < afterMoveObjectBLength; i++){
             if(this.isWhite(afterMoveObject.b[i])){
-              afterMoveObject.fromIndex = i;
-              let fromNewMoveObjectW = this.checkMove(afterMoveObject);
-              if(fromNewMoveObjectW.valid){
+              if(this.checkMove(afterMoveObject, i, afterMoveObject.toIndex)){
                 valid = false;
               }
               if(afterMoveObject.CastlingCheck){
+                let afterMoveObjectToIndex = 5;
                 if(afterMoveObject.toIndex === 2){
-                  fromNewMoveObjectW.toIndex = 3;
-                } else{
-                  fromNewMoveObjectW.toIndex = 5;
+                  afterMoveObjectToIndex = 3;
                 }
-                fromNewMoveObjectW.valid = true;
-                fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-                if(fromNewMoveObjectW.valid){
+                afterMoveObject.valid = true;
+                if(this.checkMove(afterMoveObject, afterMoveObject.fromIndex, afterMoveObjectToIndex)){
                   valid = false;
                 }
-                fromNewMoveObjectW.toIndex = 4;
-                fromNewMoveObjectW.valid = true;
-                fromNewMoveObjectW = this.checkMove(fromNewMoveObjectW);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-                if(fromNewMoveObjectW.valid){
+                afterMoveObjectToIndex = 4;
+                afterMoveObject.valid = true;
+                if(this.checkMove(afterMoveObject, afterMoveObject.fromIndex, afterMoveObjectToIndex)){
                   valid = false;
                 }
               }
@@ -237,9 +228,9 @@ export default Controller.extend({
           }
         }
       } else{
+        let afterMoveObjectBLength = afterMoveObject.b.length;
         if(afterMoveObject.b[this.lastPosWK] !== 'K'){
           let i;
-          let afterMoveObjectBLength = afterMoveObject.b.length;
           for(i = 0; i < afterMoveObjectBLength; i++){
             if(afterMoveObject.b[i] === 'K'){
               afterMoveObject.toIndex = i;
@@ -253,29 +244,23 @@ export default Controller.extend({
         }
         if(kf){
           let i;
-          let afterMoveObjectBLength = afterMoveObject.b.length;
           for(i = 0; i < afterMoveObjectBLength; i++){
             if(this.isBlack(afterMoveObject.b[i])){
-              afterMoveObject.fromIndex = i;
-              let fromNewMoveObjectB = this.checkMove(afterMoveObject);
-              if(fromNewMoveObjectB.valid){
+              if(this.checkMove(afterMoveObject, i, afterMoveObject.toIndex)){
                 valid = false;
               }
               if(afterMoveObject.CastlingCheck){
+                let afterMoveObjectToIndex = 61;
                 if(afterMoveObject.toIndex === 58){
-                  fromNewMoveObjectB.toIndex = 59;
-                } else{
-                  fromNewMoveObjectB.toIndex = 61;
+                  afterMoveObjectToIndex = 59;
                 }
-                fromNewMoveObjectB.valid = true;
-                fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-                if(fromNewMoveObjectB.valid){
+                afterMoveObject.valid = true;
+                if(this.checkMove(afterMoveObject, afterMoveObject.fromIndex, afterMoveObjectToIndex)){
                   valid = false;
                 }
-                fromNewMoveObjectB.toIndex = 60;
-                fromNewMoveObjectB.valid = true;
-                fromNewMoveObjectB = this.checkMove(fromNewMoveObjectB);            ///////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! PAS OP
-                if(fromNewMoveObjectB.valid){
+                afterMoveObjectToIndex = 60;
+                afterMoveObject.valid = true;
+                if(this.checkMove(afterMoveObject, afterMoveObject.fromIndex, afterMoveObjectToIndex)){
                   valid = false;
                 }
               }
@@ -283,18 +268,13 @@ export default Controller.extend({
           }
         }
       }
-    } else{
-      valid = false;
     }
     return valid;
   },
 
-  checkMove(moveObject){
+  checkMove(mo, fromIndex, toIndex){
     let valid = false;
-    let mo = JSON.parse(JSON.stringify(moveObject));
     if(mo.valid) {
-      let fromIndex = mo.fromIndex;
-      let toIndex = mo.toIndex;
       let piecePromotion = mo.piecePromotion;
       let b = mo.b;
       let uci = [];
@@ -304,26 +284,21 @@ export default Controller.extend({
       uci[3] = 8 - (Math.floor(toIndex / 8));
       let piece = b[fromIndex];
       if(mo.ToMove === 'w' && this.isBlack(b[fromIndex])){
-        mo.valid = false;
-        return mo;
+        return false;
       }
       if(mo.ToMove === 'b' && this.isWhite(b[fromIndex])){
-        mo.valid = false;
-        return mo;
+        return false;
       }
       if(uci[3] < 1 || uci[3] > 8){
-        mo.valid = false;
-        return mo;
+        return false;
       }
       if(piece === 'P'){
         if(uci[1] == '2' && fromIndex - toIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex - 8])){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
           if(this.algebraicToIndex(mo.EnPassant) === toIndex){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         }
         if((fromIndex - toIndex === 9 || fromIndex - toIndex === 7) && this.isBlack(b[toIndex]) && uci[3] - uci[1] === 1) {
@@ -334,28 +309,21 @@ export default Controller.extend({
         }
         if(valid === true && uci[3] === 8){
           if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
-            mo.valid = true;
-            return mo;
+            return true;
           } else{
-            mo.valid = false;
-            return mo;
+            return false;
           }
         } else{
-          mo.valid = valid;
-          return mo;
+          return valid;
         }
-
       }
-
       if(piece === 'p'){
         if(uci[1] == '7' && toIndex - fromIndex === 16 && this.isEmpty(b[toIndex]) && this.isEmpty(b[fromIndex + 8])){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
           if(this.algebraicToIndex(mo.EnPassant) === toIndex){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         }
         if((toIndex - fromIndex === 9 || toIndex - fromIndex === 7) && this.isWhite(b[toIndex]) && uci[3] - uci[1] === -1) {
@@ -366,94 +334,77 @@ export default Controller.extend({
         }
         if(valid === true && uci[3] == 1){
           if(piecePromotion === 'n' || piecePromotion === 'b' || piecePromotion === 'r' || piecePromotion === 'q'){
-            mo.valid = true;
-            return mo;
+            return true;
           } else{
-            mo.valid = false;
-            return mo;
+            return false;
           }
         } else{
-          mo.valid = valid;
-          return mo;
+          return valid;
         }
       }
       if(piece === 'N'){
         if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === 2){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === -2){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10) && this.isBlackOrEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
-          mo.valid = true;
-          return mo;
+          return true;
         }
       }
       if(piece === 'n'){
         if((toIndex - fromIndex === -17 || toIndex - fromIndex === -15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === 2){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === 17 || toIndex - fromIndex === 15) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === -2){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === -6 || toIndex - fromIndex === -10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === 1){
-          mo.valid = true;
-          return mo;
+          return true;
         }
         if((toIndex - fromIndex === 6 || toIndex - fromIndex === 10) && this.isWhiteOrEmpty(b[toIndex]) && uci[3] - uci[1] === -1){
-          mo.valid = true;
-          return mo;
+          return true;
         }
       }
       if(piece === 'K'){
         if(((toIndex === 58 && mo.CastlingWq) || (toIndex === 62 && mo.CastlingWk)) && fromIndex === 60){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         } else {
           if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         }
       }
       if(piece === 'k'){
         if(((toIndex === 2 && mo.CastlingBq) || (toIndex === 6 && mo.CastlingBk)) && fromIndex === 4){
           if(this.lineCheck(fromIndex, toIndex, b, piece + '0-0') && this.isEmpty(b[toIndex])){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         } else {
           if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-            mo.valid = true;
-            return mo;
+            return true;
           }
         }
       }
       if(piece === 'Q' || piece === 'R' || piece === 'B'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isBlackOrEmpty(b[toIndex])){
-          mo.valid = true;
-          return mo;
+          return true;
         }
       }
       if(piece === 'q' || piece === 'r' || piece === 'b'){
         if(this.lineCheck(fromIndex, toIndex, b, piece) && this.isWhiteOrEmpty(b[toIndex])){
-          mo.valid = true;
-          return mo;
+          return true;
         }
       }
     }
-    mo.valid = false;
-    return mo;
+
+    return false;
   },
   makeMove(moveObject){
     let mo = JSON.parse(JSON.stringify(moveObject));
