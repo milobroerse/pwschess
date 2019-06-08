@@ -978,10 +978,10 @@ export default Controller.extend({
     }
   },
   actions: {
-    playMove(index){
+    playMove(index,boardClick){
       let mv = get(this,'move');
-      let alg = this.indexToAlgebraic(index);
-      if(alg){
+      if(boardClick){
+        let alg = this.indexToAlgebraic(index);
         if(mv.length > 2){
           mv = '';
           alg = '';

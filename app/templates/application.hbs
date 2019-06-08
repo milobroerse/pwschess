@@ -13,7 +13,7 @@
 
 <div class="board column2" >
   {{#each tiles as |tile|}}
-    <div class = {{tile.class}} {{action "playMove" tile.index}}> </div>
+    <div class = {{tile.class}} {{action "playMove" tile.index true}}> </div>
   {{/each}}
 </div>
 <div class = "column3">
