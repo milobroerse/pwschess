@@ -192,7 +192,7 @@ export default Controller.extend({
       let kf = false;
       if(afterMoveObject.ToMove === 'w'){
         let afterMoveObjectBLength = afterMoveObject.b.length;
-        if(afterMoveObject.b[this.lastPosBK] !== 'k');
+        if(afterMoveObject.b[this.lastPosBK] !== 'k'){
           let i;
           for(i = 0; i < afterMoveObjectBLength; i++){
             if(afterMoveObject.b[i] === 'k'){
@@ -200,10 +200,11 @@ export default Controller.extend({
               this.lastPosBK = i;
               kf = true;
               break;
-          } else{
-            afterMoveObject.toIndex = this.lastPosBK;
-            kf = true;
+            }
           }
+        } else{
+          afterMoveObject.toIndex = this.lastPosBK;
+          kf = true;
         }
         if(kf){
           let i;
