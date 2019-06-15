@@ -1003,7 +1003,15 @@ export default Controller.extend({
           let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           let b = get(this,'boardArray').toArray();
           let newMoveObject = this.mvToMoveObject(fi, mv, b);
+
+          var start = new Date().getTime();
+
           let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
+
+          var end = new Date().getTime();
+          var time = end - start;
+          console.log('Execution time: ' + time);
+
           if(minimaxMove.points === -1000000){
             console.log("x");
           } else{
