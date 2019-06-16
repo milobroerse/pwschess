@@ -188,14 +188,14 @@ export default Controller.extend({
   checkValid(moveObject){
     let valid = this.checkMove(moveObject, moveObject.fromIndex, moveObject.toIndex);
     if(valid){
-      let afterMoveObject = this.makeMove(moveObject);
+      let [afterMoveObject, b] = this.makeMove(moveObject, moveObject.b);
       let kf = false;
       if(afterMoveObject.ToMove === 'w'){
-        let afterMoveObjectBLength = afterMoveObject.b.length;
-        if(afterMoveObject.b[this.lastPosBK] !== 'k'){
+        let afterMoveObjectBLength = b.length;
+        if(b[this.lastPosBK] !== 'k'){
           let i;
           for(i = 0; i < afterMoveObjectBLength; i++){
-            if(afterMoveObject.b[i] === 'k'){
+            if(b[i] === 'k'){
               afterMoveObject.toIndex = i;
               this.lastPosBK = i;
               kf = true;
@@ -209,7 +209,7 @@ export default Controller.extend({
         if(kf){
           let i;
           for(i = 0; i < afterMoveObjectBLength; i++){
-            if(this.isWhite(afterMoveObject.b[i])){
+            if(this.isWhite(b[i])){
               if(this.checkMove(afterMoveObject, i, afterMoveObject.toIndex)){
                 valid = false;
               }
@@ -232,11 +232,11 @@ export default Controller.extend({
           }
         }
       } else{
-        let afterMoveObjectBLength = afterMoveObject.b.length;
-        if(afterMoveObject.b[this.lastPosWK] !== 'K'){
+        let afterMoveObjectBLength = b.length;
+        if(b[this.lastPosWK] !== 'K'){
           let i;
           for(i = 0; i < afterMoveObjectBLength; i++){
-            if(afterMoveObject.b[i] === 'K'){
+            if(b[i] === 'K'){
               afterMoveObject.toIndex = i;
               this.lastPosWK = i;
               kf = true;
@@ -249,7 +249,7 @@ export default Controller.extend({
         if(kf){
           let i;
           for(i = 0; i < afterMoveObjectBLength; i++){
-            if(this.isBlack(afterMoveObject.b[i])){
+            if(this.isBlack(b[i])){
               if(this.checkMove(afterMoveObject, i, afterMoveObject.toIndex)){
                 valid = false;
               }
@@ -410,11 +410,15 @@ export default Controller.extend({
 
     return false;
   },
-  makeMove(moveObject){
-    let mo = JSON.parse(JSON.stringify(moveObject));
+
+  makeMove(moveObject, board){
+    // let mo = JSON.parse(JSON.stringify(moveObject));
+    let mo = Object.assign({}, moveObject);
+    let b =  Object.assign([], board);
+
     let fen = mo.Fen;
     let extra;
-    let fromIndex,toIndex,piecePromotion,b;
+    let fromIndex,toIndex,piecePromotion;
     let newfen;
     if(fen){
       //fen--->b
@@ -434,7 +438,7 @@ export default Controller.extend({
       fromIndex = mo.fromIndex;
       toIndex = mo.toIndex;
       piecePromotion = mo.piecePromotion;
-      b = mo.b;
+//      b = mo.b;
       let uci = [];
       uci[0] = (fromIndex % 8) + 1;
       uci[1] = 8 - (Math.floor(fromIndex / 8));
@@ -564,8 +568,9 @@ export default Controller.extend({
     mo.CastlingBk = extra[1].includes("k");
     mo.CastlingBq = extra[1].includes("q");
     mo.EnPassant =  EnPassant;
-    return mo;
+    return [mo, b];
   },
+
   lineCheck(fromIndex, toIndex, b, piece){
     let valid = true;
     let fromX = fromIndex % 8;
@@ -735,6 +740,7 @@ export default Controller.extend({
         'points': points
         }
     } else{
+
       let i;
       let validArray = [];
       let moveObjectBLength = moveObject.b.length;
@@ -764,10 +770,13 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    if (moveObject.b[moveObject.toIndex] + '' !== 'K'){
+                      console.log('promote');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    }
                   } else{
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
@@ -808,10 +817,13 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    if (moveObject.b[moveObject.toIndex] + '' !== 'k'){
+                      console.log('promote');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    }
                   } else{
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
@@ -848,13 +860,11 @@ export default Controller.extend({
             }
           }
           if(checkMateFlag){
-            console.log('mat')
             return {
               'mv': '',
-              'points': -1000000
+              'points': -200000 - depth
               }
           } else{
-            console.log('pat')
             return {
               'mv': '',
               'points': 0
@@ -882,13 +892,11 @@ export default Controller.extend({
             }
           }
           if(checkMateFlag){
-            console.log('mat')
             return {
               'mv': '',
-              'points': 1000000
+              'points': 200000 + depth
               }
           } else{
-            console.log('pat')
             return {
               'mv': '',
               'points': 0
@@ -919,7 +927,8 @@ export default Controller.extend({
           } else{
             moveObject.piecePromotion = '';
           }
-          moveObjectBX = this.makeMove(moveObject);
+          let b = [];
+          [moveObjectBX, b] = this.makeMove(moveObject, moveObject.b);
           let minimaxObject = this.minimax(moveObjectBX, depth - 1, false, alpha, beta);
           if(minimaxObject.points > points){
             points = minimaxObject.points;
@@ -958,7 +967,8 @@ export default Controller.extend({
             moveObject.piecePromotion = '';
           }
           moveObject.mv = arrayMove;
-          moveObjectBX = this.makeMove(moveObject);
+          let b =[];
+          [moveObjectBX,b] = this.makeMove(moveObject, moveObject.b);
           let minimaxObject = this.minimax(moveObjectBX, depth - 1, true, alpha, beta);
           if(minimaxObject.points < points){
             points = minimaxObject.points;
@@ -995,7 +1005,8 @@ export default Controller.extend({
       let moveObject = this.mvToMoveObject(fi, mv, b);
       // console.log(moveObject);
       if(this.checkValid(moveObject)){
-        let newMoveObject = this.makeMove(moveObject);
+        let [newMoveObject,b] = this.makeMove(moveObject, moveObject.b);
+        console.log(newMoveObject,b);
         set(this, 'fen', newMoveObject.Fen);
         // Ember Run Later
         later(()=>{
@@ -1004,17 +1015,33 @@ export default Controller.extend({
           let b = get(this,'boardArray').toArray();
           let newMoveObject = this.mvToMoveObject(fi, mv, b);
 
+
+
+
+          let depth = 4;
+
+
           var start = new Date().getTime();
 
-          let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
+          let minimaxMove = this.minimax(newMoveObject, depth , true, -1000000, 1000000);
 
           var end = new Date().getTime();
           var time = end - start;
           console.log('Execution time: ' + time);
 
-          if(minimaxMove.points === -1000000){
+
+          // let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
+          if(minimaxMove.points === (-100000 - depth) || minimaxMove.points === (-200000 - depth)  ){
             console.log("x");
           } else{
+            // console.log(moveObject,"moveObject1");
+            // let testObj = Object.assign({}, moveObject);
+            // testObj.b = {};
+            // Object.assign(testObj.b, moveObject.b);
+            // moveObject.b[0] = 'v';
+            // console.log(moveObject,"moveObject2");
+            // console.log(testObj);
+
             console.log(minimaxMove);
             let uci = minimaxMove.mv.split('');
             let res = [];
@@ -1028,7 +1055,7 @@ export default Controller.extend({
             } else{
               newMoveObject.piecePromotion = '';
             }
-            let newMoveObjectBX = this.makeMove(newMoveObject);
+            let [newMoveObjectBX, b] = this.makeMove(newMoveObject, newMoveObject.b);
             set(this, 'fen', newMoveObjectBX.Fen);
             set(this, 'move', '');
           }
