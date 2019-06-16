@@ -769,16 +769,15 @@ export default Controller.extend({
                 }
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
-                  if(promotionFlag){
-                    if (moveObject.b[moveObject.toIndex] + '' !== 'K'){
-                      console.log('promote');
+                  if (moveObject.b[moveObject.toIndex] + '' !== 'K'){
+                    if(promotionFlag){
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    } else{
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                     }
-                  } else{
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
                 } else{
                   if(moveObject.b[moveObject.toIndex] + '' !== '1'){
@@ -816,16 +815,15 @@ export default Controller.extend({
                 }
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
-                  if(promotionFlag){
-                    if (moveObject.b[moveObject.toIndex] + '' !== 'k'){
-                      console.log('promote');
+                  if (moveObject.b[moveObject.toIndex] + '' !== 'k'){
+                    if(promotionFlag){
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
                       validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    } else{
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                     }
-                  } else{
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
                 } else{
                   if(moveObject.b[moveObject.toIndex] + '' !== '1'){
