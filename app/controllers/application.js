@@ -740,6 +740,7 @@ export default Controller.extend({
         'points': points
         }
     } else{
+
       let i;
       let validArray = [];
       let moveObjectBLength = moveObject.b.length;
@@ -769,10 +770,13 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    if (moveObject.b[moveObject.toIndex] + '' !== 'K'){
+                      console.log('promote');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    }
                   } else{
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
@@ -813,10 +817,13 @@ export default Controller.extend({
                 moveObject.valid = true;
                 if(this.checkValid(moveObject)){
                   if(promotionFlag){
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
-                    validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    if (moveObject.b[moveObject.toIndex] + '' !== 'k'){
+                      console.log('promote');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'q');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'r');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'b');
+                      validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex) + 'n');
+                    }
                   } else{
                     validArray.push(this.indexToAlgebraic(moveObject.fromIndex) + this.indexToAlgebraic(moveObject.toIndex));
                   }
@@ -853,13 +860,11 @@ export default Controller.extend({
             }
           }
           if(checkMateFlag){
-            console.log('mat')
             return {
               'mv': '',
-              'points': -1000000
+              'points': -200000 - depth
               }
           } else{
-            console.log('pat')
             return {
               'mv': '',
               'points': 0
@@ -887,13 +892,11 @@ export default Controller.extend({
             }
           }
           if(checkMateFlag){
-            console.log('mat')
             return {
               'mv': '',
-              'points': 1000000
+              'points': 200000 + depth
               }
           } else{
-            console.log('pat')
             return {
               'mv': '',
               'points': 0
@@ -1015,12 +1018,12 @@ export default Controller.extend({
 
 
 
-
+          let depth = 4;
 
 
           var start = new Date().getTime();
 
-          let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
+          let minimaxMove = this.minimax(newMoveObject, depth , true, -1000000, 1000000);
 
           var end = new Date().getTime();
           var time = end - start;
@@ -1028,7 +1031,7 @@ export default Controller.extend({
 
 
           // let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
-          if(minimaxMove.points === -1000000){
+          if(minimaxMove.points === (-100000 - depth) || minimaxMove.points === (-200000 - depth)  ){
             console.log("x");
           } else{
             // console.log(moveObject,"moveObject1");
