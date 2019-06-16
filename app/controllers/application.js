@@ -1014,11 +1014,22 @@ export default Controller.extend({
           let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
           let b = get(this,'boardArray').toArray();
           let newMoveObject = this.mvToMoveObject(fi, mv, b);
+          let i;
+          let counter = 0;
+          for(i = 0; i < b.length; i++){
+            if(b[i] !== 1){
+              counter++;
+            }
+          }
+          let depth = 0
+          if(counter > 16){
+            depth = 4;
+          } else{
+            depth = Math.floor((32 / counter) * 1.5);
+          }
 
+          console.log(depth);
 
-
-
-          let depth = 4;
 
 
           var start = new Date().getTime();
@@ -1031,16 +1042,9 @@ export default Controller.extend({
 
 
           // let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
-          if(minimaxMove.points === (-100000 - depth) || minimaxMove.points === (-200000 - depth)  ){
+          if(minimaxMove.points === (-100000 - depth) || minimaxMove.points === (-200000 - depth)){
             console.log("x");
           } else{
-            // console.log(moveObject,"moveObject1");
-            // let testObj = Object.assign({}, moveObject);
-            // testObj.b = {};
-            // Object.assign(testObj.b, moveObject.b);
-            // moveObject.b[0] = 'v';
-            // console.log(moveObject,"moveObject2");
-            // console.log(testObj);
 
             console.log(minimaxMove);
             let uci = minimaxMove.mv.split('');
