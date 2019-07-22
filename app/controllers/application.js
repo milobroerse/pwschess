@@ -1004,7 +1004,6 @@ export default Controller.extend({
       let fi = JSON.parse(JSON.stringify(get(this,'fenInfo')));
       let b =  get(this,'boardArray').toArray();
       let moveObject = this.mvToMoveObject(fi, mv, b);
-      // console.log(moveObject);
       if(this.checkValid(moveObject)){
         let [newMoveObject,b] = this.makeMove(moveObject, moveObject.b);
         console.log(newMoveObject,b);
@@ -1022,6 +1021,7 @@ export default Controller.extend({
               counter++;
             }
           }
+
           let depth = 0
           if(counter > 16){
             depth = 4;
@@ -1031,20 +1031,18 @@ export default Controller.extend({
 
           console.log(depth);
 
-
-
-          var start = new Date().getTime();
-
+          let start = new Date().getTime();
           let minimaxMove = this.minimax(newMoveObject, depth , true, -1000000, 1000000);
+          let end = new Date().getTime();
+          let time = (Math.round((end - start)/100))/10;
 
-          var end = new Date().getTime();
-          var time = end - start;
-          console.log('Execution time: ' + time/1000 + ' Seconds');
+          console.log('Execution time: ' + time + ' Seconds');
+          let executionTime = time + ' Seconds'
+          set(this, 'executionTime', executionTime);
 
 
-          // let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
           if(minimaxMove.points === (-100000 - depth) || minimaxMove.points === (-200000 - depth)){
-            console.log("x");
+            console.log('End of Game');
           } else{
 
             console.log(minimaxMove);
