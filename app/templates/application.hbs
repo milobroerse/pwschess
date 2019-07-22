@@ -1,35 +1,31 @@
 <div class="container-fluid">
-<div class = "row">
-
-<div class = "column1">
-{{input type="text" value=fen placeholder="Vul hier een FEN in" class="form-control"}} <br/>
-<br/>
-
-<form {{action "playMove" on="submit"}}>
-    {{input class = (unless validMove 'valid') type="text" value=move placeholder=""}}
-    <button type = "submit">Move</button>
-</form>
-</div>
-
-<div class="board column2" >
-  {{#each tiles as |tile|}}
-    <div class = {{tile.class}} {{action "playMove" tile.index true}}> </div>
-  {{/each}}
-</div>
-<div class = "column4">
-<b>Execution Time:</b><br/> {{executionTime}}
-</div>
-<div class = "column3">
-  {{#if fenInfo.FenTrue}}
-    <b>To Move: </b> {{fenInfo.ToMove}}<br/>
-    <h4>Castling Availability</h4>
-    <b>White Long: </b>{{#if fenInfo.CastlingWq}}True{{else}}False{{/if}}<br/>
-    <b>White Short: </b>{{#if fenInfo.CastlingWk}}True{{else}}False{{/if}}<br/>
-    <b>Black Long: </b>{{#if fenInfo.CastlingBq}}True{{else}}False{{/if}}<br/>
-    <b>Black Short: </b>{{#if fenInfo.CastlingBk}}True{{else}}False{{/if}}<br/>
-    <b>En passant target: </b>{{fenInfo.EnPassant}}
-  {{/if}}
-</div>
-{{outlet}}
-</div>
+  <div class = "row">
+    <div class = "column1">
+      {{input type="text" value=fen placeholder="Insert a FEN" class="form-control"}}<br><br>
+      <form {{action "playMove" on="submit"}}>
+        {{input class = (unless validMove "valid") type="text" value=move placeholder=""}}
+        <button type = "submit">Move</button>
+      </form>
+    </div>
+    <div class="board column2" >
+      {{#each tiles as |tile|}}
+        <div class = {{tile.class}} {{action "playMove" tile.index true}}> </div>
+      {{/each}}
+    </div>
+    <div class = "column4">
+      <b>Execution Time:</b><br> {{executionTime}}
+    </div>
+    <div class = "column3">
+      {{#if fenInfo.FenTrue}}
+        <b>To Move: </b> {{fenInfo.ToMove}}<br>
+        <h4>Castling Availability</h4>
+        <b>White Long: </b>{{#if fenInfo.CastlingWq}}True{{else}}False{{/if}}<br>
+        <b>White Short: </b>{{#if fenInfo.CastlingWk}}True{{else}}False{{/if}}<br>
+        <b>Black Long: </b>{{#if fenInfo.CastlingBq}}True{{else}}False{{/if}}<br>
+        <b>Black Short: </b>{{#if fenInfo.CastlingBk}}True{{else}}False{{/if}}<br>
+        <b>En Passant Target: </b>{{fenInfo.EnPassant}}
+      {{/if}}
+    </div>
+    {{outlet}}
+  </div>
 </div>

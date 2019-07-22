@@ -2,12 +2,11 @@
   background-color: red;
 }
 .form-control{
-  width: 100%;
+  width: 415px;
 }
 .row{
   display: flex;
 }
-
 .column1{
   margin: 10px;
   width: 420px;
@@ -20,16 +19,14 @@
   margin: 10px;
 }
 .column4{
-  margin-top: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  width: 215px;
+  margin: 10px;
+  margin-right: auto;
+  width: 150px;
 }
 
 .board{
   border: 10px solid gray;
   height: 400px;
-  margin-right: auto;
   width: 400px;
 }
 .tile{
