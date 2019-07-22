@@ -573,6 +573,7 @@ export default Controller.extend({
 
   lineCheck(fromIndex, toIndex, b, piece){
     let valid = true;
+
     let fromX = fromIndex % 8;
     let fromY = Math.floor(fromIndex / 8);
     let toX = toIndex % 8;
@@ -580,7 +581,9 @@ export default Controller.extend({
 
     let difX = Math.abs(fromX - toX);
     let difY = Math.abs(fromY - toY);
-
+    if(difX === 0 && difY === 0){
+      return false;
+    }
     let maxXY = Math.max(difX, difY);
     let difMove = toIndex - fromIndex;
     let step = difMove / maxXY;
@@ -1036,7 +1039,7 @@ export default Controller.extend({
 
           var end = new Date().getTime();
           var time = end - start;
-          console.log('Execution time: ' + time);
+          console.log('Execution time: ' + time/1000 + ' Seconds');
 
 
           // let minimaxMove = this.minimax(newMoveObject, 4, true, -1000000, 1000000);
